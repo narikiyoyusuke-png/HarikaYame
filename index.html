@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport"/>
+<title>お買い上げ明細書</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --primary: #0078D4;
+  --primary-dark: #005a9e;
+  --accent: #00B4D8;
+  --bg: #f0f4f9;
+  --surface: #ffffff;
+  --border: #cdd8e8;
+  --text: #1a2535;
+  --text-sub: #5a6a7e;
+  --row-alt: #f8fafd;
+  --danger: #e53935;
+  --green: #2e7d32;
+  --shadow: 0 2px 14px rgba(0,80,180,0.09);
+  --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+.screen-wrapper { max-width: 1000px; margin: 0 auto; padding: 14px 12px; }
+
+/* TITLE */
+.page-title {
+  text-align: center;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+/* TOP BAR */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px 15px;
+  border-radius: 6px; border: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.87rem; font-weight: 700;
+  white-space: nowrap;
+}
+.btn-save   { background: #0078D4; color: #fff; }
+.btn-save:hover   { background: #005a9e; }
+.btn-print  { background: #37474f; color: #fff; }
+.btn-print:hover  { background: #263238; }
+.btn-clear  { background: #ef5350; color: #fff; }
+.btn-clear:hover  { background: #c62828; }
+.btn-master { background: #6a1b9a; color: #fff; }
+.btn-master:hover { background: #4a148c; }
+
+
+.date-display {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.92rem; color: var(--text-sub);
+  letter-spacing: 0.05em;
+}
+
+/* ===== MAIN TABLE ===== */
+.table-wrap {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  margin-bottom: 14px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+thead tr { background: var(--primary); color: #fff; }
+thead th {
+  padding: 9px 6px; text-align: center;
+  font-weight: 700; letter-spacing: 0.03em; white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+tbody tr:nth-child(even) { background: var(--row-alt); }
+tbody tr:hover { background: #e8f3fd; }
+tbody td { padding: 6px 5px; text-align: center; vertical-align: middle; }
+td.left  { text-align: left; padding-left: 8px; }
+td.right { text-align: right; padding-right: 8px; }
+td.mono  { font-family: 'Noto Sans JP', sans-serif; }
+
+.inp-code {
+  width: 110px; padding: 6px;
+  border: 1.5px solid var(--border); border-radius: 5px;
+  font-family: 'Noto Sans JP', sans-serif; font-size: 0.87rem;
+  text-align: center; background: #fff; transition: border 0.15s;
+}
+.inp-code:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,120,212,0.12); }
+
+.inp-qty {
+  width: 58px; padding: 6px;
+  border: 1.5px solid var(--border); border-radius: 5px;
+  font-family: 'Noto Sans JP', sans-serif; font-size: 0.87rem;
+  text-align: center; background: #fff; transition: border 0.15s;
+}
+.inp-qty:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,180,216,0.12); }
+
+.tax-badge {
+  display: inline;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  background: transparent;
+  color: var(--text);
+}
+.tax-8  { background: transparent; color: var(--text); }
+.tax-10 { background: transparent; color: var(--text); }
+
+
+.code-input-wrap {
+  position: relative;
+  display: inline-block;
+}
+.code-input-wrap .inp-code {
+  padding-right: 28px;
+}
+.code-search-btn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+.code-search-btn:hover {
+  background: rgba(0,120,212,0.10);
+}
+.code-search-btn:active {
+  background: rgba(0,120,212,0.18);
+}
+@media (max-width: 640px) {
+  .code-input-wrap .inp-code { width: 110px; padding-right: 28px; }
+  .code-search-btn { width: 24px; height: 24px; right: 2px; }
+}
+
+/* ===== BOTTOM ===== */
+.remark-wrap {
+  flex: 1;
+  min-width: 280px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+}
+.remark-label {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 8px;
+}
+#remark {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  background: #fff;
+}
+#remark:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,120,212,0.12);
+}
+.print-remark-box {
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 10px;
+  background: #fff;
+  width: 62%;
+  min-height: 96px;
+}
+.print-remark-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 8px;
+}
+.print-remark-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 60px;
+}
+.bottom-section { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; }
+
+
+.summary-wrap {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  padding: 12px 16px; min-width: 285px;
+}
+.summary-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.summary-table th {
+  padding: 6px 10px; text-align: center;
+  font-weight: 700; color: #fff; font-size: 0.79rem;
+  border-bottom: 2px solid var(--border); letter-spacing: 0.05em;
+}
+.summary-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+.summary-table td:first-child { font-weight: 500; color: var(--text-sub); font-size: 0.84rem; }
+.summary-table td.amt { text-align: right; font-family: 'Noto Sans JP', sans-serif; font-weight: 700; }
+.summary-table td.tax { text-align: right; font-family: 'Noto Sans JP', sans-serif; color: var(--text-sub); }
+.total-row td {
+  font-size: 1rem; font-weight: 900; color: var(--primary-dark);
+  border-top: 2px solid var(--primary); border-bottom: none; padding-top: 9px;
+}
+
+/* ===== MODAL ===== */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 12px;
+  padding: 26px 26px 20px;
+  width: 92%; max-width: 500px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  position: relative; max-height: 90vh; overflow-y: auto;
+}
+.modal h2 { font-size: 1.02rem; font-weight: 700; margin-bottom: 14px; color: var(--primary-dark); }
+.modal-close {
+  position: absolute; top: 14px; right: 16px;
+  font-size: 1.4rem; cursor: pointer; color: #999;
+  background: none; border: none; line-height: 1;
+}
+.modal-close:hover { color: #333; }
+
+.upload-zone {
+  border: 2.5px dashed var(--border); border-radius: 8px;
+  padding: 20px; text-align: center; cursor: pointer;
+  background: var(--row-alt); transition: all 0.15s; margin-bottom: 10px;
+}
+.upload-zone:hover, .upload-zone.drag { border-color: var(--primary); background: #e8f4fd; }
+.upload-zone p { font-size: 0.84rem; color: var(--text-sub); margin-top: 5px; }
+#csvFileInput { display: none; }
+
+.csv-format {
+  background: #f8fafd; border: 1px solid var(--border);
+  border-radius: 6px; padding: 9px 12px;
+  font-size: 0.76rem; color: var(--text-sub); margin-top: 8px;
+  font-family: 'Noto Sans JP', sans-serif; line-height: 1.7;
+}
+
+.master-preview {
+  margin-top: 12px; max-height: 200px; overflow-y: auto;
+  font-size: 0.79rem; border: 1px solid var(--border); border-radius: 6px;
+}
+.master-preview table { width: 100%; border-collapse: collapse; }
+.master-preview th {
+  background: var(--primary); color: #fff;
+  padding: 5px 7px; text-align: center; font-size: 0.77rem;
+  position: sticky; top: 0;
+}
+.master-preview td { padding: 5px 7px; border-bottom: 1px solid var(--border); text-align: center; }
+.master-preview tr:nth-child(even) td { background: var(--row-alt); }
+
+.btn-apply-master {
+  margin-top: 10px; width: 100%; padding: 10px;
+  background: var(--primary); color: #fff; border: none;
+  border-radius: 6px; font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: background 0.15s;
+}
+.btn-apply-master:hover { background: var(--primary-dark); }
+
+
+.master-preview tr.selected td {
+  background: #dff1ff !important;
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed; bottom: 22px; right: 22px;
+  background: #1b5e20; color: #fff;
+  padding: 10px 18px; border-radius: 8px;
+  font-size: 0.88rem; font-weight: 700;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.25s; z-index: 9999; pointer-events: none;
+  max-width: 320px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+
+
+.print-pages { display: none; }
+.print-page {
+  width: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.print-page + .print-page { page-break-after: always; page-break-before: always; break-before: page; }
+.print-page-number {
+  text-align: center;
+  margin-top: 3mm;
+  font-size: 9pt;
+  color: #333;
+}
+.print-summary-block {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 4mm;
+}
+.print-summary-box {
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 10px;
+  background: #fff;
+  width: 32%;
+}
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
+
+/* ===== PRINT ===== */
+@media print {
+  body { background: #fff; }
+  .screen-wrapper, .toast, .modal-bg { display: none !important; }
+  .print-pages { display: block !important; }
+  .print-page {
+    box-sizing: border-box;
+    page-break-after: auto;
+    break-after: auto;
+  }
+  .print-page + .print-page {
+    page-break-before: always;
+    break-before: page;
+  }
+  .print-page .table-wrap,
+  .print-page .print-summary-box {
+    box-shadow: none;
+    border: 1px solid #bbb;
+  }
+  .print-page .table-wrap {
+    width: 100%;
+    overflow: hidden;
+  }
+  .print-page table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 9.2pt;
+  }
+  .print-page thead tr {
+    background: #dce8f5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-page thead th {
+    color: #1a2535 !important;
+    border: 1px solid #bbb;
+    padding: 5px 4px;
+    vertical-align: middle;
+  }
+  .print-page tbody td {
+    border: 1px solid #bbb;
+    padding: 14px 5px;
+    height: 44px;
+    vertical-align: middle;
+  }
+  .print-page .page-title {
+    font-size: 22pt;
+    margin-bottom: 2mm;
+  }
+  .print-page .summary-table {
+    width: 100%;
+    font-size: 8.8pt;
+  }
+  .print-page .summary-table th,
+  .print-page .summary-table td {
+    font-size: 8.8pt;
+    font-weight: 700;
+    padding: 12px 8px;
+  }
+  .print-page .total-row td {
+    font-size: 8.8pt;
+  font-weight: 700;
+  }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 640px) {
+  table { font-size: 0.74rem; }
+  .inp-code { width: 84px; } .inp-qty { width: 44px; }
+  thead th { padding: 7px 3px; font-size: 0.73rem; }
+  tbody td  { padding: 5px 3px; }
+  .bottom-section { flex-direction: column; }
+  .summary-wrap { min-width: unset; width: 100%; }
+  .page-title { font-size: 1.1rem; }
+}
+</style>
+</head>
+<body>
+<!-- ===== MASTER UPLOAD MODAL ===== -->
+<div class="modal-bg" id="modalBg">
+<div class="modal">
+<button class="modal-close" onclick="closeModal()">×</button>
+<h2>📦 商品テーブル CSVアップロード</h2>
+<div class="upload-zone" id="uploadZone" onclick="document.getElementById('csvFileInput').click()" ondragleave="onDragLeave(event)" ondragover="onDragOver(event)" ondrop="onDrop(event)">
+<div style="font-size:2rem">📂</div>
+<p>クリックまたはCSVをドラッグ＆ドロップ</p>
+<p style="font-size:0.72rem;margin-top:3px;color:#aaa;">UTF-8 / Shift-JIS 対応</p>
+</div>
+<input accept=".csv" id="csvFileInput" onchange="onFileSelect(event)" type="file"/>
+<div class="csv-format">
+<b>CSVフォーマット（1行目はヘッダー行）</b><br/>
+      商品番号,商品名,規格,単位,税率,定価,会員価格<br/>
+      aa,商品名1,1個入り,箱,8,500,400<br/>
+      cc,商品名3,3個入り,箱,10,1500,1200
+    </div>
+<div id="masterPreviewWrap" style="display:none">
+<div class="master-preview" id="masterPreview"></div>
+<button class="btn-apply-master" onclick="applyMaster()">✅ この内容でマスタを今すぐ反映する</button>
+</div>
+</div>
+</div>
+
+<!-- ===== PRODUCT SEARCH MODAL ===== -->
+<div class="modal-bg" id="searchModalBg">
+  <div class="modal" style="max-width:900px;">
+    <button class="modal-close" onclick="closeSearchModal()">×</button>
+    <h2>🔎 商品検索</h2>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+      <input id="searchCode" type="text" placeholder="商品番号" style="flex:1;min-width:150px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;">
+      <input id="searchName" type="text" placeholder="商品名" style="flex:1;min-width:180px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;">
+      <input id="searchSpec" type="text" placeholder="規格" style="flex:1;min-width:180px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;">
+      <button class="btn btn-print" onclick="renderSearchResults()">検索</button>
+      <button class="btn btn-clear" onclick="clearSearchFilters()">条件クリア</button>
+    </div>
+
+    <div class="master-preview" id="productSearchPreview" style="max-height:360px;"></div>
+
+    <button class="btn-apply-master" onclick="applySelectedProduct()" style="margin-top:12px;">確定</button>
+  </div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="screen-wrapper">
+<div class="page-title">お買い上げ明細書</div>
+<div class="top-bar">
+<div class="btn-group">
+
+<button class="btn btn-print" onclick="handlePrint()">🖨️ 印刷</button>
+<button class="btn btn-clear" onclick="clearAll()">🗑️ クリア</button>
+<button class="btn btn-master" onclick="openModal()">⬆️ 商品マスタ</button><button class="btn btn-save" onclick="downloadProductTable()">⬇️ 商品マスタ</button>
+</div>
+<div class="date-display" id="dateDisplay"></div>
+</div>
+<!-- 明細テーブル -->
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th style="width:36px;">No.</th>
+<th style="width:120px;">商品番号</th>
+<th style="width:200px;">商品名</th>
+<th style="width:120px;">規格</th>
+<th>定価</th>
+<th>会員価格</th>
+<th>数量</th>
+<th style="width:44px;">単位</th>
+<th>金額</th>
+<th>税率</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+<!-- 備考＋集計 -->
+<div class="bottom-section">
+<div class="remark-wrap">
+<div class="remark-label">備考</div>
+<textarea id="remark" placeholder="備考を入力"></textarea>
+</div>
+<div class="summary-wrap">
+<table class="summary-table">
+<thead>
+<tr><th>税率</th><th>税込金額</th><th>内消費税</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>8%合計</td>
+<td class="amt" id="sum8"></td>
+<td class="tax" id="tax8"></td>
+</tr>
+<tr>
+<td>10%合計</td>
+<td class="amt" id="sum10"></td>
+<td class="tax" id="tax10"></td>
+</tr>
+<tr class="total-row">
+<td>合計金額</td>
+<td class="amt" id="sumTotal"></td>
+<td class="tax" id="taxTotal"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="print-pages" id="printPages"></div>
+<div class="toast" id="toast"></div>
+<script>
+// =====================================================
+//  商品マスタ（デフォルト）
+// =====================================================
+let PRODUCT_TABLE = {
+  'aa':{ name:'商品名1', spec:'1個入り', unit:'箱', price:500,  member:400,  tax:8  },
+  'bb':{ name:'商品名2', spec:'2個入り', unit:'箱', price:1000, member:800,  tax:8  },
+  'cc':{ name:'商品名3', spec:'3個入り', unit:'箱', price:1500, member:1200, tax:10 },
+  'dd':{ name:'商品名4', spec:'4個入り', unit:'箱', price:2000, member:1600, tax:10 },
+  'ee':{ name:'商品名5', spec:'5個入り', unit:'箱', price:2500, member:2000, tax:8  },
+  'ff':{ name:'商品名6', spec:'6個入り', unit:'箱', price:3000, member:2400, tax:8  },
+};
+// localStorage ラッパー（iPhone/ファイルアプリ等でブロックされる環境に対応）
+function lsGet(key) {
+  try { return localStorage.getItem(key); } catch(e) { return null; }
+}
+function lsSet(key, val) {
+  try { localStorage.setItem(key, val); } catch(e) {}
+}
+
+// ブラウザ保存マスタ復元
+try {
+  const lm = lsGet('productTable');
+  if (lm) {
+    PRODUCT_TABLE = JSON.parse(lm);
+    // 旧データに unit がない場合は空文字で補完
+    Object.values(PRODUCT_TABLE).forEach(item => {
+      if (item.unit === undefined) item.unit = '';
+    });
+  }
+} catch(e){}
+
+// =====================================================
+//  日付
+// =====================================================
+function getNow() {
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  const Y=d.getFullYear(), M=p(d.getMonth()+1), D=p(d.getDate());
+  const h=p(d.getHours()), m=p(d.getMinutes()), s=p(d.getSeconds());
+  return { ymd:`${Y}年${M}月${D}日`, stamp:`${Y}${M}${D}${h}${m}${s}` };
+}
+document.getElementById('dateDisplay').textContent = getNow().ymd;
+
+// =====================================================
+//  テーブル生成
+// =====================================================
+const ROWS = 10;
+
+function buildRows() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  for (let i = 0; i < ROWS; i++) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="mono">${i+1}</td>
+      <td>
+        <div class="code-input-wrap">
+          <input class="inp-code" type="text" id="code${i}" placeholder="商品番号"
+            autocomplete="off" oninput="onCodeChange(${i})" onkeydown="onCodeKey(event,${i})">
+          <button type="button" class="code-search-btn" onclick="openSearchForRow(${i})" aria-label="商品検索">🔍</button>
+        </div>
+      </td>
+      <td class="left" id="name${i}"></td>
+      <td id="spec${i}"></td>
+      <td class="right mono" id="price${i}"></td>
+      <td class="right mono" id="member${i}"></td>
+      <td>
+        <input class="inp-qty" type="number" id="qty${i}" min="1" placeholder="0"
+          oninput="calc()" onkeydown="onQtyKey(event,${i})">
+      </td>
+      <td id="unit${i}"></td>
+      <td class="right mono" id="amt${i}"></td>
+      <td id="taxrate${i}"></td>`;
+    tbody.appendChild(tr);
+  }
+}
+buildRows();
+
+// =====================================================
+//  行クリア
+// =====================================================
+function clearRow(i) {
+  document.getElementById(`code${i}`).value = '';
+  document.getElementById(`qty${i}`).value  = '';
+  ['name','spec','price','member','unit','amt','taxrate'].forEach(f => {
+    document.getElementById(`${f}${i}`).innerHTML = '';
+  });
+  calc();
+}
+
+// =====================================================
+//  商品番号入力
+// =====================================================
+function onCodeChange(i) {
+  const code = document.getElementById(`code${i}`).value.trim().toLowerCase();
+  const item = PRODUCT_TABLE[code];
+  if (item) {
+    document.getElementById(`name${i}`).textContent   = item.name;
+    document.getElementById(`spec${i}`).textContent   = item.spec;
+    document.getElementById(`price${i}`).textContent  = fmt(item.price);
+    document.getElementById(`member${i}`).textContent = fmt(item.member);
+    document.getElementById(`unit${i}`).textContent   = item.unit || '';
+    document.getElementById(`taxrate${i}`).innerHTML  =
+      `<span class="tax-badge tax-${item.tax}">${item.tax}%</span>`;
+  } else {
+    const mark = code ? '<span style="color:#e53935;font-size:0.78rem">?</span>' : '';
+    ['name','spec','price','member','unit','taxrate'].forEach(f => {
+      document.getElementById(`${f}${i}`).innerHTML = mark;
+    });
+    document.getElementById(`amt${i}`).innerHTML = '';
+  }
+  calc();
+}
+
+function onCodeKey(e, i) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const q = document.getElementById(`qty${i}`);
+    q.focus(); q.select();
+  }
+}
+function onQtyKey(e, i) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (i + 1 < ROWS) {
+      const c = document.getElementById(`code${i+1}`);
+      c.focus(); c.select();
+    }
+  }
+}
+
+// =====================================================
+//  計算
+// =====================================================
+function fmt(n) { return Number(n).toLocaleString('ja-JP') + '円'; }
+
+function calc() {
+  let base8 = 0, base10 = 0;
+  for (let i = 0; i < ROWS; i++) {
+    const code = document.getElementById(`code${i}`).value.trim().toLowerCase();
+    const item = PRODUCT_TABLE[code];
+    const qty  = parseInt(document.getElementById(`qty${i}`).value) || 0;
+    if (item && qty > 0) {
+      const amt = item.member * qty;
+      document.getElementById(`amt${i}`).textContent = fmt(amt);
+      if (item.tax === 8)  base8  += amt;
+      if (item.tax === 10) base10 += amt;
+    } else if (!item || !code) {
+      document.getElementById(`amt${i}`).innerHTML = '';
+    }
+  }
+  const taxAmt8  = Math.round(base8  * 0.08);
+  const taxAmt10 = Math.round(base10 * 0.10);
+  const total8   = base8  + taxAmt8;
+  const total10  = base10 + taxAmt10;
+  const grand    = total8 + total10;
+  const grandTax = taxAmt8 + taxAmt10;
+
+  const setCell = (id, v) => {
+    document.getElementById(id).textContent = v > 0 ? fmt(v) : '';
+  };
+  setCell('sum8',     total8);   setCell('tax8',     taxAmt8);
+  setCell('sum10',    total10);  setCell('tax10',    taxAmt10);
+  setCell('sumTotal', grand);    setCell('taxTotal', grandTax);
+}
+
+// =====================================================
+//  全クリア
+// =====================================================
+function clearAll() {
+  if (!confirm('入力内容をすべてクリアしますか？')) return;
+  for (let i = 0; i < ROWS; i++) clearRow(i);
+  calc();
+}
+
+// =====================================================
+//  商品テーブルDL / 永続化
+// =====================================================
+function persistProductTable() {
+  lsSet('productTable', JSON.stringify(PRODUCT_TABLE));
+}
+
+function buildProductTableCSV() {
+  const lines = [];
+  lines.push('商品番号,商品名,規格,単位,税率,定価,会員価格');
+  Object.entries(PRODUCT_TABLE)
+    .sort((a,b) => a[0].localeCompare(b[0], 'ja'))
+    .forEach(([code, item]) => {
+      const row = [
+        csvEscape(code),
+        csvEscape(item.name || ''),
+        csvEscape(item.spec || ''),
+        csvEscape(item.unit || ''),
+        csvEscape(item.tax ?? ''),
+        csvEscape(item.price ?? 0),
+        csvEscape(item.member ?? 0),
+      ];
+      lines.push(row.join(','));
+    });
+  return lines.join("\n");
+}
+
+function parseCSVLine(line) {
+  const cols = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === ',' && !inQuotes) {
+      cols.push(cur);
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  cols.push(cur);
+  return cols;
+}
+
+function csvEscape(value) {
+  const s = String(value ?? '');
+  return /[",\\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadProductTable() {
+  const keys = Object.keys(PRODUCT_TABLE || {});
+  if (keys.length === 0) {
+    showToast('⚠️ 商品テーブルがありません', '#b71c1c');
+    return;
+  }
+  persistProductTable();
+  const bom  = '﻿';
+  const blob = new Blob([bom + buildProductTableCSV()], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const { stamp } = getNow();
+  a.href = url;
+  a.download = `product_table_${stamp}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`⬇ 商品テーブルを保存しました（${keys.length}件）`);
+}
+
+// =====================================================
+//  トースト
+// =====================================================
+function showToast(msg, bg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = bg || '#1b5e20';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+
+// =====================================================
+//  商品検索
+// =====================================================
+let searchTargetRow = null;
+let selectedSearchCode = '';
+
+function getFocusedCodeRow() {
+  const el = document.activeElement;
+  if (!el || !el.id) return null;
+  const m = el.id.match(/^code(\d+)$/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+function openSearchForRow(row) {
+  searchTargetRow = row;
+  document.getElementById('searchModalBg').classList.add('open');
+  document.getElementById('searchCode').value = '';
+  document.getElementById('searchName').value = '';
+  document.getElementById('searchSpec').value = '';
+  selectedSearchCode = '';
+  renderSearchResults();
+  document.getElementById('searchCode').focus();
+}
+
+function openSearchFromFocusedCode() {
+  const row = getFocusedCodeRow();
+  if (row === null) return;
+  openSearchForRow(row);
+}
+
+function closeSearchModal() {
+  document.getElementById('searchModalBg').classList.remove('open');
+  selectedSearchCode = '';
+}
+
+document.getElementById('searchModalBg').addEventListener('click', function(e) {
+  if (e.target === this) closeSearchModal();
+});
+
+['searchCode','searchName','searchSpec'].forEach(id => {
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        renderSearchResults();
+      }
+    });
+  });
+});
+
+function clearSearchFilters() {
+  document.getElementById('searchCode').value = '';
+  document.getElementById('searchName').value = '';
+  document.getElementById('searchSpec').value = '';
+  selectedSearchCode = '';
+  renderSearchResults();
+  document.getElementById('searchCode').focus();
+}
+
+function renderSearchResults() {
+  const codeKw = document.getElementById('searchCode').value.trim().toLowerCase();
+  const nameKw = document.getElementById('searchName').value.trim().toLowerCase();
+  const specKw = document.getElementById('searchSpec').value.trim().toLowerCase();
+
+  const rows = Object.entries(PRODUCT_TABLE)
+    .sort((a,b) => a[0].localeCompare(b[0], 'ja'))
+    .filter(([code, item]) => {
+      const c = code.toLowerCase();
+      const n = String(item.name || '').toLowerCase();
+      const s = String(item.spec || '').toLowerCase();
+      return (!codeKw || c.includes(codeKw))
+          && (!nameKw || n.includes(nameKw))
+          && (!specKw || s.includes(specKw));
+    });
+
+  const wrap = document.getElementById('productSearchPreview');
+  if (rows.length === 0) {
+    wrap.innerHTML = '<div style="padding:12px;color:#666;">該当商品がありません。</div>';
+    return;
+  }
+
+  let html = '<table><thead><tr>'
+    + '<th>選択</th><th style="width:120px;">商品番号</th><th style="width:200px;">商品名</th><th style="width:120px;">規格</th><th style="width:60px;">単位</th><th>税率</th><th>定価</th><th>会員価格</th>'
+    + '</tr></thead><tbody>';
+
+  rows.forEach(([code, item]) => {
+    const checked = selectedSearchCode === code ? 'checked' : '';
+    const cls = selectedSearchCode === code ? ' class="selected"' : '';
+    html += `<tr${cls} onclick="selectSearchProduct('${escapeHtml(code)}')">
+      <td><input type="radio" name="productSelect" value="${escapeHtml(code)}" ${checked} onclick="event.stopPropagation(); selectSearchProduct('${escapeHtml(code)}')"></td>
+      <td>${escapeHtml(code)}</td>
+      <td>${escapeHtml(item.name || '')}</td>
+      <td>${escapeHtml(item.spec || '')}</td>
+      <td>${escapeHtml(item.unit || '')}</td>
+      <td>${item.tax ? `${item.tax}%` : ''}</td>
+      <td style="text-align:right;">${item.price !== '' && item.price !== null && item.price !== undefined ? fmt(item.price) : ''}</td>
+      <td style="text-align:right;">${item.member !== '' && item.member !== null && item.member !== undefined ? fmt(item.member) : ''}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function selectSearchProduct(code) {
+  selectedSearchCode = code;
+  renderSearchResults();
+}
+
+function applySelectedProduct() {
+  if (searchTargetRow === null) {
+    alert('呼び出し元の行が特定できません。');
+    return;
+  }
+  if (!selectedSearchCode) {
+    alert('商品を選択してください。');
+    return;
+  }
+  const codeEl = document.getElementById(`code${searchTargetRow}`);
+  codeEl.value = selectedSearchCode;
+  onCodeChange(searchTargetRow);
+  const qtyEl = document.getElementById(`qty${searchTargetRow}`);
+  qtyEl.focus();
+  qtyEl.select();
+  closeSearchModal();
+}
+
+
+// =====================================================
+//  商品テーブル CSVアップロード
+// =====================================================
+let pendingMaster = null;
+
+function openModal()  { document.getElementById('modalBg').classList.add('open'); }
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+  document.getElementById('masterPreviewWrap').style.display = 'none';
+  document.getElementById('csvFileInput').value = '';
+  pendingMaster = null;
+}
+document.getElementById('modalBg').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function onDragOver(e)  { e.preventDefault(); document.getElementById('uploadZone').classList.add('drag'); }
+function onDragLeave(e) { document.getElementById('uploadZone').classList.remove('drag'); }
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) readCSVFile(file);
+}
+function onFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) readCSVFile(file);
+}
+
+function readCSVFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    let text = ev.target.result;
+    if ((text.match(/\uFFFD/g)||[]).length > 3) {
+      // Shift-JISで再読み込み
+      const r2 = new FileReader();
+      r2.onload = e2 => parseCSV(e2.target.result);
+      r2.readAsText(file, 'Shift-JIS');
+    } else {
+      parseCSV(text);
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSV(text) {
+  text = text.replace(/^\uFEFF/, '');
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+  if (lines.length < 2) { alert('データが少なすぎます（ヘッダー＋1行以上必要）'); return; }
+
+  const newMaster   = {};
+  const previewRows = [];
+  let duplicateCode = null;
+  lines.slice(1).forEach(line => {
+    if (duplicateCode) return;
+    const cols = parseCSVLine(line);
+    if (cols.length < 6) return;
+    const trimmed = cols.map(c => c.trim());
+    const code = trimmed[0];
+    if (!code) return;
+    // 重複チェック
+    if (newMaster[code.toLowerCase()] !== undefined) {
+      duplicateCode = code;
+      return;
+    }
+    // 単位列あり(7列)か旧フォーマット(6列)かを判定
+    let name, spec, unit, taxStr, priceStr, memberStr;
+    if (trimmed.length >= 7) {
+      [, name, spec, unit, taxStr, priceStr, memberStr] = trimmed;
+    } else {
+      [, name, spec, taxStr, priceStr, memberStr] = trimmed;
+      unit = '';
+    }
+    const tax    = parseInt(taxStr)    || 8;
+    const price  = parseInt(priceStr)  || 0;
+    const member = parseInt(memberStr) || 0;
+    newMaster[code.toLowerCase()] = { name, spec, unit, price, member, tax };
+    previewRows.push({ code, name, spec, unit, tax, price, member });
+  });
+  if (duplicateCode) {
+    alert('同じ商品コードがあります。取込ファイルを修正してください。商品番号=' + duplicateCode);
+    return;
+  }
+
+  if (Object.keys(newMaster).length === 0) {
+    alert('有効なデータが見つかりませんでした。\nCSVフォーマットを確認してください。');
+    return;
+  }
+  pendingMaster = newMaster;
+  showMasterPreview(previewRows);
+}
+
+function showMasterPreview(rows) {
+  const wrap = document.getElementById('masterPreviewWrap');
+  const prev = document.getElementById('masterPreview');
+  wrap.style.display = 'block';
+  let html = '<table><thead><tr>'
+    + '<th style="width:120px;">商品番号</th><th style="width:200px;">商品名</th><th style="width:120px;">規格</th><th style="width:60px;">単位</th><th>税率</th><th>定価</th><th>会員価格</th>'
+    + '</tr></thead><tbody>';
+  rows.forEach(r => {
+    html += `<tr><td>${r.code}</td><td>${r.name}</td><td>${r.spec}</td><td>${r.unit||''}</td>`
+          + `<td>${r.tax ? `${r.tax}%` : ''}</td><td>${fmt(r.price)}</td><td>${fmt(r.member)}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  prev.innerHTML = html;
+}
+
+function applyMaster() {
+  if (!pendingMaster) return;
+  PRODUCT_TABLE = pendingMaster;
+  persistProductTable();
+  // 即時反映：既存入力行を再評価
+  for (let i = 0; i < ROWS; i++) onCodeChange(i);
+  calc();
+  closeModal();
+  showToast(`✅ 商品テーブルに保存しました（${Object.keys(PRODUCT_TABLE).length}件）`);
+}
+
+// =====================================================
+//  印刷
+// =====================================================
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[s]));
+}
+
+function getCurrentRowsForPrint() {
+  const rows = [];
+  for (let i = 0; i < ROWS; i++) {
+    const code = document.getElementById(`code${i}`).value.trim();
+    const qty  = document.getElementById(`qty${i}`).value.trim();
+    const key  = code.toLowerCase();
+    const item = PRODUCT_TABLE[key];
+    const qtyNum = parseInt(qty) || 0;
+
+    // 印刷対象は、商品番号または数量が入っている行のみ
+    if (!code && !qty) continue;
+
+    const amt = item && qtyNum > 0 ? item.member * qtyNum : 0;
+    rows.push({
+      no: i + 1,
+      code,
+      name: item ? item.name : '',
+      spec: item ? item.spec : '',
+      price: item ? item.price : '',
+      member: item ? item.member : '',
+      qty,
+      amt,
+      unit: item ? (item.unit || '') : '',
+      tax: item ? item.tax : ''
+    });
+  }
+
+  // 1行も入力がない場合は空の1行だけ出す
+  if (rows.length === 0) {
+    rows.push({
+      no: 1, code: '', name: '', spec: '', price: '', member: '', qty: '', amt: '', tax: ''
+    });
+  }
+  return rows;
+}
+
+function buildPrintPageRows(rows) {
+  const out = [];
+  for (let idx = 0; idx < rows.length; idx++) {
+    const r = rows[idx];
+    out.push(`
+    <tr>
+      <td class="mono">${idx + 1}</td>
+      <td class="mono">${escapeHtml(r.code || '')}</td>
+      <td class="left">${escapeHtml(r.name || '')}</td>
+      <td>${escapeHtml(r.spec || '')}</td>
+      <td class="right mono">${r.price !== '' ? fmt(r.price) : ''}</td>
+      <td class="right mono">${r.member !== '' ? fmt(r.member) : ''}</td>
+      <td class="mono">${escapeHtml(r.qty || '')}</td>
+      <td>${escapeHtml(r.unit || '')}</td>
+      <td class="right mono">${r.amt ? fmt(r.amt) : ''}</td>
+      <td>${r.tax ? `<span class="tax-badge tax-${r.tax}">${r.tax}%</span>` : ''}</td>
+    </tr>`);
+  }
+  while (out.length < 6) {
+    out.push(`
+    <tr>
+      <td class="mono">${out.length + 1}</td>
+      <td class="mono"></td>
+      <td class="left"></td>
+      <td></td>
+      <td class="right mono"></td>
+      <td class="right mono"></td>
+      <td class="mono"></td>
+      <td></td>
+      <td class="right mono"></td>
+      <td></td>
+    </tr>`);
+  }
+  return out.join('');
+}
+
+function buildPrintPages() {
+  const printPages = document.getElementById('printPages');
+  const allRows = getCurrentRowsForPrint();
+  const chunkSize = 6;
+  const chunks = [];
+  for (let i = 0; i < allRows.length; i += chunkSize) chunks.push(allRows.slice(i, i + chunkSize));
+  const totalPages = chunks.length;
+
+  const sum8 = document.getElementById('sum8').textContent;
+  const tax8 = document.getElementById('tax8').textContent;
+  const sum10 = document.getElementById('sum10').textContent;
+  const tax10 = document.getElementById('tax10').textContent;
+  const sumTotal = document.getElementById('sumTotal').textContent;
+  const taxTotal = document.getElementById('taxTotal').textContent;
+  const dateText = document.getElementById('dateDisplay').textContent;
+  const remarkText = document.getElementById('remark').value || '';
+
+  printPages.innerHTML = chunks.map((rows, idx) => `
+    <section class="print-page">
+      <div style="position:relative;margin-bottom:2mm;">
+        <div class="page-title" style="text-align:center;">お買い上げ明細書</div>
+        <div style="position:absolute;top:0;right:0;font-size:10pt;">
+          ${escapeHtml(dateText)}
+        </div>
+      </div>
+      <div style="text-align:right;font-size:9pt;line-height:1.4;margin-bottom:3mm;">
+        <span style="font-size:13pt;font-weight:700;">ハリカ八女店</span><br>
+        <br>
+        〒834-0023 福岡県八女市馬場５４−４<br>
+        TEL 0943-24-2355
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px;">No.</th>
+              <th style="width:120px;">商品番号</th>
+              <th style="width:200px;">商品名</th>
+              <th style="width:120px;">規格</th>
+              <th>定価</th>
+              <th>会員価格</th>
+              <th>数量</th>
+              <th style="width:40px;">単位</th>
+              <th>金額</th>
+              <th>税率</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${buildPrintPageRows(rows)}
+          </tbody>
+        </table>
+      </div>
+      <div class="print-summary-block">
+        <div style="flex:1;min-width:0;padding-right:12px;">
+          <div style="font-size:9pt;font-weight:700;color:#555;margin-bottom:4px;">備考</div>
+          <div style="font-size:9pt;white-space:pre-wrap;word-break:break-word;min-height:120px;border:1px solid #bbb;border-radius:4px;padding:6px 8px;">${escapeHtml(remarkText)}</div>
+        </div>
+        <div class="print-summary-box">
+          <table class="summary-table">
+            <thead>
+              <tr><th>税率</th><th>税込金額</th><th>内消費税</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>8%合計</td><td class="amt">${escapeHtml(sum8)}</td><td class="tax">${escapeHtml(tax8)}</td></tr>
+              <tr><td>10%合計</td><td class="amt">${escapeHtml(sum10)}</td><td class="tax">${escapeHtml(tax10)}</td></tr>
+              <tr class="total-row"><td>合計金額</td><td class="amt">${escapeHtml(sumTotal)}</td><td class="tax">${escapeHtml(taxTotal)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="print-page-number">${idx + 1} / ${totalPages}</div>
+    </section>`).join('');
+}
+
+function handlePrint() {
+  buildPrintPages();
+  window.print();
+}
+
+// =====================================================
+//  起動
+// =====================================================
+calc();
+</script>
+</body>
+</html>
