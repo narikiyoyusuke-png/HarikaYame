@@ -31,6 +31,16 @@ body {
 }
 .screen-wrapper { max-width: 1000px; margin: 0 auto; padding: 14px 12px; }
 
+/* ===== STICKY HEADER ===== */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  padding-top: 14px;
+  margin-top: -14px;
+}
+
 /* TITLE */
 .page-title {
   text-align: center;
@@ -85,6 +95,8 @@ body {
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: calc(100vh - 160px);
   margin-bottom: 14px;
 }
 table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
@@ -92,6 +104,9 @@ thead tr { background: var(--primary); color: #fff; }
 thead th {
   padding: 9px 6px; text-align: center;
   font-weight: 700; letter-spacing: 0.03em; white-space: nowrap;
+  position: sticky; top: 0; z-index: 2;
+  background: var(--primary);
+  color: #fff;
 }
 tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
 tbody tr:nth-child(even) { background: var(--row-alt); }
