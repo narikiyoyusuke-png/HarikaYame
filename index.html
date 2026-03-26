@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport"/>
-<title>お買い上げ明細書</title>
+<title>注文書</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
 <style>
 :root {
@@ -177,10 +177,69 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
   .code-search-btn { width: 24px; height: 24px; right: 2px; }
 }
 
+/* ===== CUSTOMER INFO ===== */
+.customer-info-section {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+.customer-fields {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  flex: 0 0 auto;
+  width: fit-content;
+  max-width: 55%;
+  min-width: 280px;
+}
+.customer-field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.customer-field-row:last-child { margin-bottom: 0; }
+.customer-field-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  white-space: nowrap;
+  min-width: 62px;
+}
+.customer-field-label-after {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+.inp-customer {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.87rem;
+  background: #fff;
+  transition: border 0.15s;
+}
+.inp-customer:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,120,212,0.12);
+}
+.inp-customer-zip {
+  width: 130px;
+  flex: 0 0 130px;
+}
+
 /* ===== BOTTOM ===== */
 .remark-wrap {
-  flex: 1;
-  min-width: 280px;
+  flex: 2;
+  min-width: 200px;
+  max-width: 66%;
   background: var(--surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -233,11 +292,12 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 
 
 .summary-wrap {
+  flex: 1;
   background: var(--surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
-  padding: 12px 16px; min-width: 285px;
+  padding: 12px 16px; min-width: 280px;
 }
 .summary-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
 .summary-table th {
@@ -333,6 +393,7 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 
 
 
+/* ===== PRINT PAGES (screen hidden) ===== */
 .print-pages { display: none; }
 .print-page {
   width: 100%;
@@ -343,92 +404,192 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 .print-page + .print-page { page-break-after: always; page-break-before: always; break-before: page; }
 .print-page-number {
   text-align: center;
-  margin-top: 3mm;
+  margin-top: 2mm;
   font-size: 9pt;
   color: #333;
 }
 .print-summary-block {
   display: flex;
-  gap: 12px;
-  align-items: flex-end;
+  gap: 10px;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-top: 4mm;
+  margin-top: 3mm;
 }
 .print-summary-box {
   border: 1px solid #bbb;
-  border-radius: 6px;
-  padding: 10px;
+  border-radius: 4px;
+  padding: 6px 8px;
   background: #fff;
-  width: 32%;
+  width: 34%;
+  flex-shrink: 0;
 }
+
+/* ===== @page: A4 landscape ===== */
 @page {
   size: A4 landscape;
   margin: 10mm;
 }
 
-/* ===== PRINT ===== */
+/* ===== PRINT MEDIA ===== */
 @media print {
-  body { background: #fff; }
+  html, body {
+    width: 297mm;
+    height: 210mm;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
   .screen-wrapper, .toast, .modal-bg { display: none !important; }
   .print-pages { display: block !important; }
+
+  /* Each copy = exactly one A4 landscape page */
   .print-page {
     box-sizing: border-box;
-    page-break-after: auto;
-    break-after: auto;
+    width: 277mm;          /* 297 - 2×10mm margins */
+    height: 190mm;         /* 210 - 2×10mm margins */
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+    display: flex;
+    flex-direction: column;
+    font-size: 11pt;
   }
-  .print-page + .print-page {
-    page-break-before: always;
-    break-before: page;
+  .print-page:last-child {
+    page-break-after: avoid;
+    break-after: avoid;
   }
-  .print-page .table-wrap,
-  .print-page .print-summary-box {
-    box-shadow: none;
-    border: 1px solid #bbb;
+
+  /* Title */
+  .print-page .page-title {
+    font-size: 26pt;
+    font-weight: 900;
+    margin-bottom: 1mm;
+    line-height: 1.1;
   }
+
+  /* Shop info block */
+  .print-page .shop-info {
+    font-size: 11.5pt;
+    line-height: 1.5;
+    margin-bottom: 2mm;
+  }
+
+  /* Remark (below table, left of summary) — handled in summary-block */
+
+  /* Detail table */
   .print-page .table-wrap {
     width: 100%;
     overflow: hidden;
+    box-shadow: none;
+    border: 1.5px solid #666;
+    flex-shrink: 0;
   }
   .print-page table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    font-size: 9.2pt;
+    font-size: 11pt;
   }
   .print-page thead tr {
-    background: #dce8f5 !important;
+    background: #ffffff !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
   .print-page thead th {
+    background: #ffffff !important;
     color: #1a2535 !important;
-    border: 1px solid #bbb;
+    border: 1px solid #888;
     padding: 5px 4px;
     vertical-align: middle;
+    font-size: 10.5pt;
+    line-height: 1.3;
   }
   .print-page tbody td {
-    border: 1px solid #bbb;
-    padding: 14px 5px;
-    height: 44px;
+    border: 1px solid #888;
+    padding: 10px 5px;
+    height: 40px;
+    line-height: 1.4;
     vertical-align: middle;
+    font-size: 11pt;
   }
-  .print-page .page-title {
-    font-size: 22pt;
-    margin-bottom: 2mm;
+
+  /* Remark box left of summary */
+  .print-page .print-remark-left {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 136px;
+  }
+  .print-page .print-remark-left .label {
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 3px;
+    font-size: 9.5pt;
+  }
+  .print-page .print-remark-left .remark-box {
+    flex: 1;
+    border: 1.5px solid #888;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 10pt;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* Summary block */
+  .print-summary-block {
+    margin-top: 3mm;
+    flex-shrink: 0;
+  }
+
+  /* Page number — pushed to bottom via flex */
+  .print-page-number {
+    margin-top: auto;
+    padding-top: 1mm;
+    font-size: 9pt;
+    flex-shrink: 0;
+  }
+
+  .print-page .print-summary-box {
+    box-shadow: none;
+    border: 1.5px solid #666;
+    padding: 4px 8px;
+    width: 34%;
   }
   .print-page .summary-table {
     width: 100%;
-    font-size: 8.8pt;
+    font-size: 10pt;
+    border-collapse: collapse;
   }
-  .print-page .summary-table th,
-  .print-page .summary-table td {
-    font-size: 8.8pt;
+  .print-page .summary-table thead tr {
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-page .summary-table th {
+    background: #ffffff !important;
+    font-size: 10pt;
     font-weight: 700;
-    padding: 12px 8px;
+    padding: 5px 8px;
+    color: #1a2535 !important;
+    border-bottom: 1.5px solid #888;
+  }
+  .print-page .summary-table td {
+    font-size: 10pt;
+    font-weight: 600;
+    padding: 5px 8px;
+    height: auto;
+    border: none;
+    border-bottom: 1px solid #aaa;
   }
   .print-page .total-row td {
-    font-size: 8.8pt;
-  font-weight: 700;
+    font-size: 10.5pt;
+    font-weight: 900;
+    padding: 5px 8px;
+    border-top: 2px solid #0078D4;
   }
 }
 
@@ -458,9 +619,9 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 <input accept=".csv" id="csvFileInput" onchange="onFileSelect(event)" type="file"/>
 <div class="csv-format">
 <b>CSVフォーマット（1行目はヘッダー行）</b><br/>
-      商品番号,商品名,規格,単位,税率,定価,会員価格<br/>
-      aa,商品名1,1個入り,箱,8,500,400<br/>
-      cc,商品名3,3個入り,箱,10,1500,1200
+      商品番号,商品名,規格,単位,税率,定価,会員価格,商品区分<br/>
+      aa,商品名1,1個入り,箱,8,500,400,1<br/>
+      bb,袋商品,小袋,枚,10,100,80,2
     </div>
 <div id="masterPreviewWrap" style="display:none">
 <div class="master-preview" id="masterPreview"></div>
@@ -491,7 +652,7 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 
 <!-- ===== MAIN ===== -->
 <div class="screen-wrapper">
-<div class="page-title">お買い上げ明細書</div>
+<div class="page-title">注文書</div>
 <div class="top-bar">
 <div class="btn-group">
 
@@ -501,6 +662,34 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 </div>
 <div class="date-display" id="dateDisplay"></div>
 </div>
+<!-- 顧客情報 -->
+<div class="customer-info-section">
+  <div class="customer-fields">
+    <div class="customer-field-row">
+      <span class="customer-field-label">氏名</span>
+      <input class="inp-customer" id="customerName" type="text" placeholder="氏名を入力" style="flex:1;max-width:160px;">
+      <span class="customer-field-label-after">様</span>
+      <span class="customer-field-label" style="margin-left:12px;">電話番号</span>
+      <input class="inp-customer" id="customerTel" type="tel" placeholder="000-0000-0000" style="width:140px;flex:0 0 140px;">
+    </div>
+    <div class="customer-field-row">
+      <span class="customer-field-label">郵便番号</span>
+      <input class="inp-customer inp-customer-zip" id="customerZip" type="text" placeholder="000-0000" maxlength="8" oninput="formatZip(this)" style="width:130px;flex:0 0 130px;">
+    </div>
+    <div class="customer-field-row">
+      <span class="customer-field-label">住所①</span>
+      <input class="inp-customer" id="customerAddr1" type="text" placeholder="都道府県・市区町村">
+    </div>
+    <div class="customer-field-row">
+      <span class="customer-field-label">住所②</span>
+      <input class="inp-customer" id="customerAddr2" type="text" placeholder="町名・番地">
+    </div>
+    <div class="customer-field-row">
+      <span class="customer-field-label">住所③</span>
+      <input class="inp-customer" id="customerAddr3" type="text" placeholder="建物名・部屋番号など">
+    </div>
+  </div>
+</div>
 <!-- 明細テーブル -->
 <div class="table-wrap">
 <table>
@@ -509,10 +698,10 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 <th style="width:36px;">No.</th>
 <th style="width:120px;">商品番号</th>
 <th style="width:200px;">商品名</th>
-<th style="width:120px;">規格</th>
 <th>定価</th>
 <th>会員価格</th>
 <th>数量</th>
+<th>発送数</th>
 <th style="width:44px;">単位</th>
 <th>金額</th>
 <th>税率</th>
@@ -530,7 +719,7 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 <div class="summary-wrap">
 <table class="summary-table">
 <thead>
-<tr><th>税率</th><th>税込金額</th><th>内消費税</th></tr>
+<tr><th>項目</th><th>税込金額</th><th>内消費税</th></tr>
 </thead>
 <tbody>
 <tr>
@@ -542,6 +731,16 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 <td>10%合計</td>
 <td class="amt" id="sum10"></td>
 <td class="tax" id="tax10"></td>
+</tr>
+<tr>
+<td>袋代合計</td>
+<td class="amt" id="sumBag"></td>
+<td class="tax" id="taxBag"></td>
+</tr>
+<tr>
+<td>配送料</td>
+<td class="amt"><input type="number" id="deliveryFee" min="0" placeholder="0" style="width:90px;padding:4px 6px;border:1.5px solid var(--border);border-radius:5px;font-size:0.87rem;text-align:right;" oninput="calc()"></td>
+<td class="tax" id="taxDelivery"></td>
 </tr>
 <tr class="total-row">
 <td>合計金額</td>
@@ -560,12 +759,12 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 //  商品マスタ（デフォルト）
 // =====================================================
 let PRODUCT_TABLE = {
-  'aa':{ name:'商品名1', spec:'1個入り', unit:'箱', price:500,  member:400,  tax:8  },
-  'bb':{ name:'商品名2', spec:'2個入り', unit:'箱', price:1000, member:800,  tax:8  },
-  'cc':{ name:'商品名3', spec:'3個入り', unit:'箱', price:1500, member:1200, tax:10 },
-  'dd':{ name:'商品名4', spec:'4個入り', unit:'箱', price:2000, member:1600, tax:10 },
-  'ee':{ name:'商品名5', spec:'5個入り', unit:'箱', price:2500, member:2000, tax:8  },
-  'ff':{ name:'商品名6', spec:'6個入り', unit:'箱', price:3000, member:2400, tax:8  },
+  'aa':{ name:'商品名1', spec:'1個入り', unit:'箱', price:500,  member:400,  tax:8,  category:1 },
+  'bb':{ name:'商品名2', spec:'2個入り', unit:'箱', price:1000, member:800,  tax:8,  category:1 },
+  'cc':{ name:'商品名3', spec:'3個入り', unit:'箱', price:1500, member:1200, tax:10, category:1 },
+  'dd':{ name:'商品名4', spec:'4個入り', unit:'箱', price:2000, member:1600, tax:10, category:1 },
+  'ee':{ name:'商品名5', spec:'5個入り', unit:'箱', price:2500, member:2000, tax:8,  category:2 },
+  'ff':{ name:'商品名6', spec:'6個入り', unit:'箱', price:3000, member:2400, tax:8,  category:2 },
 };
 // localStorage ラッパー（iPhone/ファイルアプリ等でブロックされる環境に対応）
 function lsGet(key) {
@@ -583,9 +782,24 @@ try {
     // 旧データに unit がない場合は空文字で補完
     Object.values(PRODUCT_TABLE).forEach(item => {
       if (item.unit === undefined) item.unit = '';
+      if (item.category === undefined) item.category = 1;
     });
   }
 } catch(e){}
+
+// =====================================================
+//  郵便番号フォーマット（入力時に 000-0000 形式に整形）
+// =====================================================
+function formatZip(input) {
+  // 数字のみ抽出
+  let digits = input.value.replace(/[^0-9]/g, '');
+  if (digits.length > 7) digits = digits.slice(0, 7);
+  if (digits.length > 3) {
+    input.value = digits.slice(0, 3) + '-' + digits.slice(3);
+  } else {
+    input.value = digits;
+  }
+}
 
 // =====================================================
 //  日付
@@ -619,12 +833,15 @@ function buildRows() {
         </div>
       </td>
       <td class="left" id="name${i}"></td>
-      <td id="spec${i}"></td>
       <td class="right mono" id="price${i}"></td>
       <td class="right mono" id="member${i}"></td>
       <td>
         <input class="inp-qty" type="number" id="qty${i}" min="1" placeholder="0"
           oninput="calc()" onkeydown="onQtyKey(event,${i})">
+      </td>
+      <td>
+        <input class="inp-qty" type="number" id="dispatch${i}" min="0" placeholder="0"
+          style="background:#fffde7;" onkeydown="onDispatchKey(event,${i})">
       </td>
       <td id="unit${i}"></td>
       <td class="right mono" id="amt${i}"></td>
@@ -640,7 +857,8 @@ buildRows();
 function clearRow(i) {
   document.getElementById(`code${i}`).value = '';
   document.getElementById(`qty${i}`).value  = '';
-  ['name','spec','price','member','unit','amt','taxrate'].forEach(f => {
+  document.getElementById(`dispatch${i}`).value = '';
+  ['name','price','member','unit','amt','taxrate'].forEach(f => {
     document.getElementById(`${f}${i}`).innerHTML = '';
   });
   calc();
@@ -654,7 +872,6 @@ function onCodeChange(i) {
   const item = PRODUCT_TABLE[code];
   if (item) {
     document.getElementById(`name${i}`).textContent   = item.name;
-    document.getElementById(`spec${i}`).textContent   = item.spec;
     document.getElementById(`price${i}`).textContent  = fmt(item.price);
     document.getElementById(`member${i}`).textContent = fmt(item.member);
     document.getElementById(`unit${i}`).textContent   = item.unit || '';
@@ -662,7 +879,7 @@ function onCodeChange(i) {
       `<span class="tax-badge tax-${item.tax}">${item.tax}%</span>`;
   } else {
     const mark = code ? '<span style="color:#e53935;font-size:0.78rem">?</span>' : '';
-    ['name','spec','price','member','unit','taxrate'].forEach(f => {
+    ['name','price','member','unit','taxrate'].forEach(f => {
       document.getElementById(`${f}${i}`).innerHTML = mark;
     });
     document.getElementById(`amt${i}`).innerHTML = '';
@@ -680,6 +897,13 @@ function onCodeKey(e, i) {
 function onQtyKey(e, i) {
   if (e.key === 'Enter') {
     e.preventDefault();
+    const d = document.getElementById(`dispatch${i}`);
+    d.focus(); d.select();
+  }
+}
+function onDispatchKey(e, i) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
     if (i + 1 < ROWS) {
       const c = document.getElementById(`code${i+1}`);
       c.focus(); c.select();
@@ -693,7 +917,7 @@ function onQtyKey(e, i) {
 function fmt(n) { return Number(n).toLocaleString('ja-JP') + '円'; }
 
 function calc() {
-  let base8 = 0, base10 = 0;
+  let base8 = 0, base10 = 0, bagBase8 = 0, bagBase10 = 0;
   for (let i = 0; i < ROWS; i++) {
     const code = document.getElementById(`code${i}`).value.trim().toLowerCase();
     const item = PRODUCT_TABLE[code];
@@ -701,25 +925,47 @@ function calc() {
     if (item && qty > 0) {
       const amt = item.member * qty;
       document.getElementById(`amt${i}`).textContent = fmt(amt);
-      if (item.tax === 8)  base8  += amt;
-      if (item.tax === 10) base10 += amt;
+      const cat = item.category || 1;
+      if (cat === 1) {
+        if (item.tax === 8)  base8  += amt;
+        if (item.tax === 10) base10 += amt;
+      } else if (cat === 2) {
+        if (item.tax === 8)  bagBase8  += amt;
+        if (item.tax === 10) bagBase10 += amt;
+      }
     } else if (!item || !code) {
       document.getElementById(`amt${i}`).innerHTML = '';
     }
   }
-  const taxAmt8  = Math.round(base8  * 0.08);
-  const taxAmt10 = Math.round(base10 * 0.10);
-  const total8   = base8  + taxAmt8;
-  const total10  = base10 + taxAmt10;
-  const grand    = total8 + total10;
-  const grandTax = taxAmt8 + taxAmt10;
+  const taxAmt8   = Math.round(base8   * 8 / 108);
+  const taxAmt10  = Math.round(base10  * 10 / 110);
+  const total8    = base8  + Math.round(base8  * 0.08);
+  const total10   = base10 + Math.round(base10 * 0.10);
+
+  // bag (category=2): tax-inclusive amounts
+  const bagTotal8  = bagBase8  + Math.round(bagBase8  * 0.08);
+  const bagTotal10 = bagBase10 + Math.round(bagBase10 * 0.10);
+  const bagTotal   = bagTotal8 + bagTotal10;
+  const bagTax8    = Math.round(bagBase8  * 8 / 108);
+  const bagTax10   = Math.round(bagBase10 * 10 / 110);
+  const bagTax     = bagTax8 + bagTax10;
+
+  // delivery fee (手入力) — treat as 10% taxed
+  const deliveryRaw = parseInt(document.getElementById('deliveryFee').value) || 0;
+  const deliveryTax = Math.round(deliveryRaw * 10 / 110);
+
+  const grand    = (base8 + Math.round(base8*0.08)) + (base10 + Math.round(base10*0.10)) + bagTotal + deliveryRaw;
+  const grandTax = taxAmt8 + taxAmt10 + bagTax + deliveryTax;
 
   const setCell = (id, v) => {
-    document.getElementById(id).textContent = v > 0 ? fmt(v) : '';
+    const el = document.getElementById(id);
+    if (el) el.textContent = v > 0 ? fmt(v) : '';
   };
-  setCell('sum8',     total8);   setCell('tax8',     taxAmt8);
-  setCell('sum10',    total10);  setCell('tax10',    taxAmt10);
-  setCell('sumTotal', grand);    setCell('taxTotal', grandTax);
+  setCell('sum8',     base8  + Math.round(base8  * 0.08)); setCell('tax8',     taxAmt8);
+  setCell('sum10',    base10 + Math.round(base10 * 0.10)); setCell('tax10',    taxAmt10);
+  setCell('sumBag',   bagTotal);                           setCell('taxBag',   bagTax);
+  setCell('taxDelivery', deliveryTax);
+  setCell('sumTotal', grand);                              setCell('taxTotal', grandTax);
 }
 
 // =====================================================
@@ -728,6 +974,7 @@ function calc() {
 function clearAll() {
   if (!confirm('入力内容をすべてクリアしますか？')) return;
   for (let i = 0; i < ROWS; i++) clearRow(i);
+  document.getElementById('deliveryFee').value = '';
   calc();
 }
 
@@ -740,7 +987,7 @@ function persistProductTable() {
 
 function buildProductTableCSV() {
   const lines = [];
-  lines.push('商品番号,商品名,規格,単位,税率,定価,会員価格');
+  lines.push('商品番号,商品名,規格,単位,税率,定価,会員価格,商品区分');
   Object.entries(PRODUCT_TABLE)
     .sort((a,b) => a[0].localeCompare(b[0], 'ja'))
     .forEach(([code, item]) => {
@@ -752,6 +999,7 @@ function buildProductTableCSV() {
         csvEscape(item.tax ?? ''),
         csvEscape(item.price ?? 0),
         csvEscape(item.member ?? 0),
+        csvEscape(item.category ?? 1),
       ];
       lines.push(row.join(','));
     });
@@ -1014,19 +1262,26 @@ function parseCSV(text) {
       duplicateCode = code;
       return;
     }
-    // 単位列あり(7列)か旧フォーマット(6列)かを判定
-    let name, spec, unit, taxStr, priceStr, memberStr;
-    if (trimmed.length >= 7) {
+    // 8列(新): 商品番号,商品名,規格,単位,税率,定価,会員価格,商品区分
+    // 7列: 商品番号,商品名,規格,単位,税率,定価,会員価格
+    // 6列(旧): 商品番号,商品名,規格,税率,定価,会員価格
+    let name, spec, unit, taxStr, priceStr, memberStr, categoryStr;
+    if (trimmed.length >= 8) {
+      [, name, spec, unit, taxStr, priceStr, memberStr, categoryStr] = trimmed;
+    } else if (trimmed.length >= 7) {
       [, name, spec, unit, taxStr, priceStr, memberStr] = trimmed;
+      categoryStr = '1';
     } else {
       [, name, spec, taxStr, priceStr, memberStr] = trimmed;
       unit = '';
+      categoryStr = '1';
     }
-    const tax    = parseInt(taxStr)    || 8;
-    const price  = parseInt(priceStr)  || 0;
-    const member = parseInt(memberStr) || 0;
-    newMaster[code.toLowerCase()] = { name, spec, unit, price, member, tax };
-    previewRows.push({ code, name, spec, unit, tax, price, member });
+    const tax      = parseInt(taxStr)      || 8;
+    const price    = parseInt(priceStr)    || 0;
+    const member   = parseInt(memberStr)   || 0;
+    const category = parseInt(categoryStr) || 1;
+    newMaster[code.toLowerCase()] = { name, spec, unit, price, member, tax, category };
+    previewRows.push({ code, name, spec, unit, tax, price, member, category });
   });
   if (duplicateCode) {
     alert('同じ商品コードがあります。取込ファイルを修正してください。商品番号=' + duplicateCode);
@@ -1046,11 +1301,11 @@ function showMasterPreview(rows) {
   const prev = document.getElementById('masterPreview');
   wrap.style.display = 'block';
   let html = '<table><thead><tr>'
-    + '<th style="width:120px;">商品番号</th><th style="width:200px;">商品名</th><th style="width:120px;">規格</th><th style="width:60px;">単位</th><th>税率</th><th>定価</th><th>会員価格</th>'
+    + '<th style="width:120px;">商品番号</th><th style="width:200px;">商品名</th><th style="width:120px;">規格</th><th style="width:60px;">単位</th><th>税率</th><th>定価</th><th>会員価格</th><th>商品区分</th>'
     + '</tr></thead><tbody>';
   rows.forEach(r => {
     html += `<tr><td>${r.code}</td><td>${r.name}</td><td>${r.spec}</td><td>${r.unit||''}</td>`
-          + `<td>${r.tax ? `${r.tax}%` : ''}</td><td>${fmt(r.price)}</td><td>${fmt(r.member)}</td></tr>`;
+          + `<td>${r.tax ? `${r.tax}%` : ''}</td><td>${fmt(r.price)}</td><td>${fmt(r.member)}</td><td>${r.category||1}</td></tr>`;
   });
   html += '</tbody></table>';
   prev.innerHTML = html;
@@ -1079,6 +1334,7 @@ function getCurrentRowsForPrint() {
   for (let i = 0; i < ROWS; i++) {
     const code = document.getElementById(`code${i}`).value.trim();
     const qty  = document.getElementById(`qty${i}`).value.trim();
+    const dispatch = document.getElementById(`dispatch${i}`).value.trim();
     const key  = code.toLowerCase();
     const item = PRODUCT_TABLE[key];
     const qtyNum = parseInt(qty) || 0;
@@ -1095,16 +1351,18 @@ function getCurrentRowsForPrint() {
       price: item ? item.price : '',
       member: item ? item.member : '',
       qty,
+      dispatch,
       amt,
       unit: item ? (item.unit || '') : '',
-      tax: item ? item.tax : ''
+      tax: item ? item.tax : '',
+      category: item ? (item.category || 1) : 1
     });
   }
 
   // 1行も入力がない場合は空の1行だけ出す
   if (rows.length === 0) {
     rows.push({
-      no: 1, code: '', name: '', spec: '', price: '', member: '', qty: '', amt: '', tax: ''
+      no: 1, code: '', name: '', spec: '', price: '', member: '', qty: '', dispatch: '', amt: '', tax: '', category: 1
     });
   }
   return rows;
@@ -1119,10 +1377,10 @@ function buildPrintPageRows(rows) {
       <td class="mono">${idx + 1}</td>
       <td class="mono">${escapeHtml(r.code || '')}</td>
       <td class="left">${escapeHtml(r.name || '')}</td>
-      <td>${escapeHtml(r.spec || '')}</td>
       <td class="right mono">${r.price !== '' ? fmt(r.price) : ''}</td>
       <td class="right mono">${r.member !== '' ? fmt(r.member) : ''}</td>
       <td class="mono">${escapeHtml(r.qty || '')}</td>
+      <td class="mono" style="background:#fffde7;">${escapeHtml(r.dispatch || '')}</td>
       <td>${escapeHtml(r.unit || '')}</td>
       <td class="right mono">${r.amt ? fmt(r.amt) : ''}</td>
       <td>${r.tax ? `<span class="tax-badge tax-${r.tax}">${r.tax}%</span>` : ''}</td>
@@ -1134,10 +1392,10 @@ function buildPrintPageRows(rows) {
       <td class="mono">${out.length + 1}</td>
       <td class="mono"></td>
       <td class="left"></td>
-      <td></td>
       <td class="right mono"></td>
       <td class="right mono"></td>
       <td class="mono"></td>
+      <td class="mono" style="background:#fffde7;"></td>
       <td></td>
       <td class="right mono"></td>
       <td></td>
@@ -1154,43 +1412,66 @@ function buildPrintPages() {
   for (let i = 0; i < allRows.length; i += chunkSize) chunks.push(allRows.slice(i, i + chunkSize));
   const totalPages = chunks.length;
 
-  const sum8 = document.getElementById('sum8').textContent;
-  const tax8 = document.getElementById('tax8').textContent;
-  const sum10 = document.getElementById('sum10').textContent;
-  const tax10 = document.getElementById('tax10').textContent;
+  const sum8    = document.getElementById('sum8').textContent;
+  const tax8    = document.getElementById('tax8').textContent;
+  const sum10   = document.getElementById('sum10').textContent;
+  const tax10   = document.getElementById('tax10').textContent;
+  const sumBag  = document.getElementById('sumBag').textContent;
+  const taxBag  = document.getElementById('taxBag').textContent;
+  const deliveryVal = parseInt(document.getElementById('deliveryFee').value) || 0;
+  const deliveryDisp = deliveryVal > 0 ? fmt(deliveryVal) : '';
+  const taxDelivery = document.getElementById('taxDelivery').textContent;
   const sumTotal = document.getElementById('sumTotal').textContent;
   const taxTotal = document.getElementById('taxTotal').textContent;
   const dateText = document.getElementById('dateDisplay').textContent;
   const remarkText = document.getElementById('remark').value || '';
+  const custName  = document.getElementById('customerName').value.trim();
+  const custZip   = document.getElementById('customerZip').value.trim();
+  const custAddr1 = document.getElementById('customerAddr1').value.trim();
+  const custAddr2 = document.getElementById('customerAddr2').value.trim();
+  const custAddr3 = document.getElementById('customerAddr3').value.trim();
+  const custTel   = document.getElementById('customerTel') ? document.getElementById('customerTel').value.trim() : '';
 
-  printPages.innerHTML = chunks.map((rows, idx) => `
+  const COPY_TITLES = ['注文書', '注文書（控）', '注文書（お客様控）'];
+
+  const buildCopy = (copyTitle) => chunks.map((rows, idx) => `
     <section class="print-page">
-      <div style="position:relative;margin-bottom:2mm;">
-        <div class="page-title" style="text-align:center;">お買い上げ明細書</div>
-        <div style="position:absolute;top:0;right:0;font-size:10pt;">
+      <div style="position:relative;margin-bottom:1mm;">
+        <div class="page-title" style="text-align:center;">${escapeHtml(copyTitle)}</div>
+        <div style="position:absolute;top:0;right:0;font-size:10pt;line-height:1.2;">
           ${escapeHtml(dateText)}
         </div>
       </div>
-      <div style="text-align:right;font-size:9pt;line-height:1.4;margin-bottom:3mm;">
-        <span style="font-size:13pt;font-weight:700;">ハリカ八女店</span><br>
-        <br>
-        〒834-0023 福岡県八女市馬場５４−４<br>
-        TEL 0943-24-2355
+      <!-- 住所(左) + 店舗情報(右) -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2mm;">
+        <div style="font-size:12pt;line-height:2;">
+          ${custZip ? `<div><span style="font-size:10pt;color:#555;">〒</span> ${escapeHtml(custZip)}</div>` : ''}
+          ${(custAddr1 || custAddr2 || custAddr3) ? `<div>${[custAddr1, custAddr2, custAddr3].filter(Boolean).map(a => escapeHtml(a)).join('')}</div>` : ''}
+          ${custName ? `<div style="font-size:13pt;font-weight:700;margin-top:0.5mm;">${escapeHtml(custName)} <span style="font-size:11pt;font-weight:400;">様</span></div>` : ''}
+          ${custTel  ? `<div style="font-size:11pt;">TEL: ${escapeHtml(custTel)}</div>` : ''}
+        </div>
+        <div class="shop-info" style="text-align:left;line-height:1.6;">
+          <span style="font-size:15pt;font-weight:700;display:block;">ハリカ八女店</span>
+          <span style="display:block;">〒834-0023</span>
+          <span style="display:block;">福岡県八女市馬場５４−４</span>
+          <span style="display:block;">TEL 0943-24-2355　FAX 0943-24-2364</span>
+          <span style="display:block;">営業時間：10:00〜18:00　店休日：日曜日</span>
+        </div>
       </div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th style="width:36px;">No.</th>
-              <th style="width:120px;">商品番号</th>
-              <th style="width:200px;">商品名</th>
-              <th style="width:120px;">規格</th>
-              <th>定価</th>
-              <th>会員価格</th>
-              <th>数量</th>
-              <th style="width:40px;">単位</th>
-              <th>金額</th>
-              <th>税率</th>
+              <th style="width:28px;background:#fff;color:#1a2535;">No.</th>
+              <th style="width:100px;background:#fff;color:#1a2535;">商品番号</th>
+              <th style="background:#fff;color:#1a2535;">商品名</th>
+              <th style="width:140px;background:#fff;color:#1a2535;">定価</th>
+              <th style="width:140px;background:#fff;color:#1a2535;">会員価格</th>
+              <th style="width:84px;background:#fff;color:#1a2535;">数量</th>
+              <th style="width:84px;background:#fff;color:#1a2535;">発送数</th>
+              <th style="width:64px;background:#fff;color:#1a2535;">単位</th>
+              <th style="width:144px;background:#fff;color:#1a2535;">金額</th>
+              <th style="width:72px;background:#fff;color:#1a2535;">税率</th>
             </tr>
           </thead>
           <tbody>
@@ -1199,18 +1480,24 @@ function buildPrintPages() {
         </table>
       </div>
       <div class="print-summary-block">
-        <div style="flex:1;min-width:0;padding-right:12px;">
-          <div style="font-size:9pt;font-weight:700;color:#555;margin-bottom:4px;">備考</div>
-          <div style="font-size:9pt;white-space:pre-wrap;word-break:break-word;min-height:120px;border:1px solid #bbb;border-radius:4px;padding:6px 8px;">${escapeHtml(remarkText)}</div>
+        <div class="print-remark-left">
+          <div class="label">備考</div>
+          <div class="remark-box">${remarkText ? escapeHtml(remarkText) : '　'}</div>
         </div>
         <div class="print-summary-box">
           <table class="summary-table">
             <thead>
-              <tr><th>税率</th><th>税込金額</th><th>内消費税</th></tr>
+              <tr>
+                <th style="background:#fff;color:#1a2535;">項目</th>
+                <th style="background:#fff;color:#1a2535;">税込金額</th>
+                <th style="background:#fff;color:#1a2535;">内消費税</th>
+              </tr>
             </thead>
             <tbody>
               <tr><td>8%合計</td><td class="amt">${escapeHtml(sum8)}</td><td class="tax">${escapeHtml(tax8)}</td></tr>
               <tr><td>10%合計</td><td class="amt">${escapeHtml(sum10)}</td><td class="tax">${escapeHtml(tax10)}</td></tr>
+              <tr><td>袋代合計</td><td class="amt">${escapeHtml(sumBag)}</td><td class="tax">${escapeHtml(taxBag)}</td></tr>
+              <tr><td>配送料</td><td class="amt">${escapeHtml(deliveryDisp)}</td><td class="tax">${escapeHtml(taxDelivery)}</td></tr>
               <tr class="total-row"><td>合計金額</td><td class="amt">${escapeHtml(sumTotal)}</td><td class="tax">${escapeHtml(taxTotal)}</td></tr>
             </tbody>
           </table>
@@ -1218,11 +1505,18 @@ function buildPrintPages() {
       </div>
       <div class="print-page-number">${idx + 1} / ${totalPages}</div>
     </section>`).join('');
+
+  printPages.innerHTML = COPY_TITLES.map(title => buildCopy(title)).join('');
 }
 
 function handlePrint() {
   buildPrintPages();
+  // iOSで印刷時に正しいスケールになるようviewportを一時変更
+  const vpMeta = document.querySelector('meta[name="viewport"]');
+  const origContent = vpMeta ? vpMeta.getAttribute('content') : '';
+  if (vpMeta) vpMeta.setAttribute('content', 'width=1060');
   window.print();
+  if (vpMeta) setTimeout(() => vpMeta.setAttribute('content', origContent), 500);
 }
 
 // =====================================================
