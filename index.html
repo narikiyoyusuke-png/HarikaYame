@@ -190,10 +190,7 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
   padding: 12px 16px;
-  flex: 0 0 auto;
-  width: fit-content;
-  max-width: 55%;
-  min-width: 280px;
+  width: 100%;
 }
 .customer-field-row {
   display: flex;
@@ -207,7 +204,6 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
   font-weight: 700;
   color: var(--text-sub);
   white-space: nowrap;
-  min-width: 62px;
 }
 .customer-field-label-after {
   font-size: 0.88rem;
@@ -300,10 +296,12 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
   padding: 12px 16px; min-width: 280px;
 }
 .summary-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.summary-table thead { background: var(--primary); }
 .summary-table th {
   padding: 6px 10px; text-align: center;
   font-weight: 700; color: #fff; font-size: 0.79rem;
-  border-bottom: 2px solid var(--border); letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--primary); letter-spacing: 0.05em;
+  background: var(--primary);
 }
 .summary-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
 .summary-table td:first-child { font-weight: 500; color: var(--text-sub); font-size: 0.84rem; }
@@ -428,6 +426,9 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 @page {
   size: A4 landscape;
   margin: 10mm;
+  /* ブラウザ標準のヘッダー（日時・タイトル）・フッター（URL・ページ番号）を非表示 */
+  margin-header: 0;
+  margin-footer: 0;
 }
 
 /* ===== PRINT MEDIA ===== */
@@ -441,6 +442,8 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  /* ブラウザのヘッダー・フッター（URL・日時・タイトル）を非表示 */
+  head, title { display: none !important; }
   .screen-wrapper, .toast, .modal-bg { display: none !important; }
   .print-pages { display: block !important; }
 
@@ -485,10 +488,12 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
     box-shadow: none;
     border: 1.5px solid #666;
     flex-shrink: 0;
+    margin-top: -1mm;
   }
   .print-page table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     table-layout: fixed;
     font-size: 11pt;
   }
@@ -500,19 +505,67 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
   .print-page thead th {
     background: #ffffff !important;
     color: #1a2535 !important;
-    border: 1px solid #888;
+    border-top: 1px solid #888;
+    border-bottom: 1px solid #888;
+    border-left: 2px solid #555;
+    border-right: 0;
     padding: 5px 4px;
     vertical-align: middle;
     font-size: 10.5pt;
     line-height: 1.3;
   }
+  .print-page thead th:last-child {
+    border-right: 2px solid #555;
+  }
   .print-page tbody td {
-    border: 1px solid #888;
-    padding: 10px 5px;
-    height: 40px;
-    line-height: 1.4;
+    border-top: 0;
+    border-bottom: 1px solid #888;
+    border-left: 2px solid #555;
+    border-right: 0;
+    padding: 8px 5px;
+    line-height: 1.3;
     vertical-align: middle;
     font-size: 11pt;
+  }
+  .print-page tbody td:last-child {
+    border-right: 2px solid #555;
+  }
+  .print-page .info-table tr,
+  .print-page .info-table tbody tr {
+    border: none !important;
+    border-bottom: none !important;
+  }
+  /* 明細テーブル タイトル行・偶数行色 */
+  .print-page .table-wrap thead tr {
+    background: #dce8f5 !important;
+  }
+  .print-page .table-wrap thead th {
+    background: #dce8f5 !important;
+  }
+  .print-page .table-wrap tbody tr:nth-child(even) td {
+    background: #f0f5fb !important;
+  }
+  .print-page .info-table td,
+  .print-page .info-table tbody td,
+  .print-page .info-table tbody tr td {
+    border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    background: #ffffff !important;
+  }
+  .print-page tr {
+    background: #ffffff !important;
+  }
+  .print-page tr:nth-child(even) {
+    background: #ffffff !important;
+  }
+  .print-page tr:hover {
+    background: #ffffff !important;
+  }
+  .print-page tbody tr:first-child td {
+    border-top: 1px solid #888;
   }
 
   /* Remark box left of summary */
@@ -541,7 +594,7 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 
   /* Summary block */
   .print-summary-block {
-    margin-top: 3mm;
+    margin-top: 7mm;
     flex-shrink: 0;
   }
 
@@ -555,9 +608,10 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 
   .print-page .print-summary-box {
     box-shadow: none;
-    border: 1.5px solid #666;
+    border: none;
     padding: 4px 8px;
     width: 34%;
+    margin-top: 22px;
   }
   .print-page .summary-table {
     width: 100%;
@@ -655,39 +709,39 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 <div class="page-title">注文書</div>
 <div class="top-bar">
 <div class="btn-group">
-
 <button class="btn btn-print" onclick="handlePrint()">🖨️ 印刷</button>
 <button class="btn btn-clear" onclick="clearAll()">🗑️ クリア</button>
 <button class="btn btn-master" onclick="openModal()">⬆️ 商品マスタ</button><button class="btn btn-save" onclick="downloadProductTable()">⬇️ 商品マスタ</button>
 </div>
-<div class="date-display" id="dateDisplay"></div>
 </div>
-<!-- 顧客情報 -->
-<div class="customer-info-section">
-  <div class="customer-fields">
-    <div class="customer-field-row">
-      <span class="customer-field-label">氏名</span>
-      <input class="inp-customer" id="customerName" type="text" placeholder="氏名を入力" style="flex:1;max-width:160px;">
-      <span class="customer-field-label-after">様</span>
-      <span class="customer-field-label" style="margin-left:12px;">電話番号</span>
-      <input class="inp-customer" id="customerTel" type="tel" placeholder="000-0000-0000" style="width:140px;flex:0 0 140px;">
-    </div>
-    <div class="customer-field-row">
-      <span class="customer-field-label">郵便番号</span>
-      <input class="inp-customer inp-customer-zip" id="customerZip" type="text" placeholder="000-0000" maxlength="8" oninput="formatZip(this)" style="width:130px;flex:0 0 130px;">
-    </div>
-    <div class="customer-field-row">
-      <span class="customer-field-label">住所①</span>
-      <input class="inp-customer" id="customerAddr1" type="text" placeholder="都道府県・市区町村">
-    </div>
-    <div class="customer-field-row">
-      <span class="customer-field-label">住所②</span>
-      <input class="inp-customer" id="customerAddr2" type="text" placeholder="町名・番地">
-    </div>
-    <div class="customer-field-row">
-      <span class="customer-field-label">住所③</span>
-      <input class="inp-customer" id="customerAddr3" type="text" placeholder="建物名・部屋番号など">
-    </div>
+<!-- 日付グループ＋顧客情報（統合ブロック） -->
+<div style="background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);padding:12px 16px;width:100%;margin-bottom:12px;">
+  <!-- 日付行 -->
+  <div class="customer-field-row">
+    <span class="customer-field-label">承り日</span>
+    <input class="inp-customer" type="date" id="dateUketsuke" style="width:145px;flex:0 0 145px;">
+    <span class="customer-field-label" style="margin-left:20px;">使用日</span>
+    <input class="inp-customer" type="date" id="dateShiyo" style="width:145px;flex:0 0 145px;">
+    <span class="customer-field-label" style="margin-left:20px;">集金日</span>
+    <input class="inp-customer" type="date" id="dateShukkin" style="width:145px;flex:0 0 145px;">
+  </div>
+  <!-- 顧客情報 -->
+  <div class="customer-field-row">
+    <span class="customer-field-label">カードNo.</span>
+    <input class="inp-customer" id="customerCardNo" type="text" placeholder="カードNo." style="width:110px;flex:0 0 110px;">
+    <span class="customer-field-label" style="margin-left:20px;">氏名</span>
+    <input class="inp-customer" id="customerName" type="text" placeholder="氏名を入力" style="width:160px;flex:0 0 160px;">
+    <span class="customer-field-label-after">様</span>
+  </div>
+  <div class="customer-field-row">
+    <span class="customer-field-label">電話番号</span>
+    <input class="inp-customer" id="customerTel" type="tel" placeholder="000-0000-0000" style="width:150px;flex:0 0 150px;">
+  </div>
+  <div class="customer-field-row">
+    <span class="customer-field-label">郵便番号</span>
+    <input class="inp-customer inp-customer-zip" id="customerZip" type="text" placeholder="000-0000" maxlength="8" oninput="formatZip(this)" style="width:100px;flex:0 0 100px;">
+    <span class="customer-field-label" style="margin-left:20px;">住所</span>
+    <input class="inp-customer" id="customerAddr1" type="text" placeholder="住所を入力" style="flex:1;">
   </div>
 </div>
 <!-- 明細テーブル -->
@@ -701,7 +755,7 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 <th>定価</th>
 <th>会員価格</th>
 <th>数量</th>
-<th>発送数</th>
+<th>内発送数</th>
 <th style="width:44px;">単位</th>
 <th>金額</th>
 <th>税率</th>
@@ -719,33 +773,33 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 <div class="summary-wrap">
 <table class="summary-table">
 <thead>
-<tr><th>項目</th><th>税込金額</th><th>内消費税</th></tr>
+<tr><th>項目</th><th>税込金額</th></tr>
 </thead>
 <tbody>
 <tr>
 <td>8%合計</td>
 <td class="amt" id="sum8"></td>
-<td class="tax" id="tax8"></td>
 </tr>
 <tr>
 <td>10%合計</td>
 <td class="amt" id="sum10"></td>
-<td class="tax" id="tax10"></td>
 </tr>
 <tr>
 <td>袋代合計</td>
 <td class="amt" id="sumBag"></td>
-<td class="tax" id="taxBag"></td>
 </tr>
 <tr>
 <td>配送料</td>
-<td class="amt"><input type="number" id="deliveryFee" min="0" placeholder="0" style="width:90px;padding:4px 6px;border:1.5px solid var(--border);border-radius:5px;font-size:0.87rem;text-align:right;" oninput="calc()"></td>
-<td class="tax" id="taxDelivery"></td>
+<td class="amt" style="white-space:nowrap;">
+  <input type="text" inputmode="numeric" id="deliveryFee" placeholder="0"
+    style="width:90px;padding:4px 6px;border:1.5px solid var(--border);border-radius:5px;font-size:0.87rem;text-align:right;"
+    oninput="onDeliveryInput(this)">
+  <span id="deliveryFeeYen" style="display:none;font-size:0.87rem;margin-left:3px;">円</span>
+</td>
 </tr>
 <tr class="total-row">
 <td>合計金額</td>
 <td class="amt" id="sumTotal"></td>
-<td class="tax" id="taxTotal"></td>
 </tr>
 </tbody>
 </table>
@@ -788,6 +842,22 @@ try {
 } catch(e){}
 
 // =====================================================
+//  配送料入力：カンマ区切り表示・「円」ラベル制御
+// =====================================================
+function onDeliveryInput(input) {
+  // カーソル位置保持のためカンマ除去→数値取得→再フォーマット
+  const raw = input.value.replace(/,/g, '');
+  const num = parseInt(raw);
+  if (!isNaN(num) && raw !== '') {
+    input.value = num.toLocaleString('ja-JP');
+  } else if (raw === '') {
+    input.value = '';
+  }
+  document.getElementById('deliveryFeeYen').style.display = (raw !== '' && !isNaN(num)) ? 'inline' : 'none';
+  calc();
+}
+
+// =====================================================
 //  郵便番号フォーマット（入力時に 000-0000 形式に整形）
 // =====================================================
 function formatZip(input) {
@@ -809,9 +879,15 @@ function getNow() {
   const p = n => String(n).padStart(2,'0');
   const Y=d.getFullYear(), M=p(d.getMonth()+1), D=p(d.getDate());
   const h=p(d.getHours()), m=p(d.getMinutes()), s=p(d.getSeconds());
-  return { ymd:`${Y}年${M}月${D}日`, stamp:`${Y}${M}${D}${h}${m}${s}` };
+  return { ymd:`${Y}年${M}月${D}日`, isoDate:`${Y}-${M}-${D}`, stamp:`${Y}${M}${D}${h}${m}${s}` };
 }
-document.getElementById('dateDisplay').textContent = getNow().ymd;
+document.getElementById('dateUketsuke').value = getNow().isoDate;
+
+function formatDateJP(isoDate) {
+  if (!isoDate) return '';
+  const [y, m, d] = isoDate.split('-');
+  return `${y}年${m}月${d}日`;
+}
 
 // =====================================================
 //  テーブル生成
@@ -841,7 +917,7 @@ function buildRows() {
       </td>
       <td>
         <input class="inp-qty" type="number" id="dispatch${i}" min="0" placeholder="0"
-          style="background:#fffde7;" onkeydown="onDispatchKey(event,${i})">
+          style="background:#fff;" onkeydown="onDispatchKey(event,${i})">
       </td>
       <td id="unit${i}"></td>
       <td class="right mono" id="amt${i}"></td>
@@ -951,7 +1027,7 @@ function calc() {
   const bagTax     = bagTax8 + bagTax10;
 
   // delivery fee (手入力) — treat as 10% taxed
-  const deliveryRaw = parseInt(document.getElementById('deliveryFee').value) || 0;
+  const deliveryRaw = parseInt((document.getElementById('deliveryFee').value || '').replace(/,/g, '')) || 0;
   const deliveryTax = Math.round(deliveryRaw * 10 / 110);
 
   const grand    = (base8 + Math.round(base8*0.08)) + (base10 + Math.round(base10*0.10)) + bagTotal + deliveryRaw;
@@ -975,6 +1051,16 @@ function clearAll() {
   if (!confirm('入力内容をすべてクリアしますか？')) return;
   for (let i = 0; i < ROWS; i++) clearRow(i);
   document.getElementById('deliveryFee').value = '';
+  document.getElementById('deliveryFeeYen').style.display = 'none';
+  document.getElementById('customerCardNo').value = '';
+  document.getElementById('customerName').value = '';
+  document.getElementById('customerTel').value = '';
+  document.getElementById('customerZip').value = '';
+  document.getElementById('customerAddr1').value = '';
+  document.getElementById('remark').value = '';
+  document.getElementById('dateUketsuke').value = getNow().isoDate;
+  document.getElementById('dateShiyo').value = '';
+  document.getElementById('dateShukkin').value = '';
   calc();
 }
 
@@ -1380,7 +1466,7 @@ function buildPrintPageRows(rows) {
       <td class="right mono">${r.price !== '' ? fmt(r.price) : ''}</td>
       <td class="right mono">${r.member !== '' ? fmt(r.member) : ''}</td>
       <td class="mono">${escapeHtml(r.qty || '')}</td>
-      <td class="mono" style="background:#fffde7;">${escapeHtml(r.dispatch || '')}</td>
+      <td class="mono">${escapeHtml(r.dispatch || '')}</td>
       <td>${escapeHtml(r.unit || '')}</td>
       <td class="right mono">${r.amt ? fmt(r.amt) : ''}</td>
       <td>${r.tax ? `<span class="tax-badge tax-${r.tax}">${r.tax}%</span>` : ''}</td>
@@ -1395,7 +1481,7 @@ function buildPrintPageRows(rows) {
       <td class="right mono"></td>
       <td class="right mono"></td>
       <td class="mono"></td>
-      <td class="mono" style="background:#fffde7;"></td>
+      <td class="mono"></td>
       <td></td>
       <td class="right mono"></td>
       <td></td>
@@ -1412,66 +1498,91 @@ function buildPrintPages() {
   for (let i = 0; i < allRows.length; i += chunkSize) chunks.push(allRows.slice(i, i + chunkSize));
   const totalPages = chunks.length;
 
-  const sum8    = document.getElementById('sum8').textContent;
-  const tax8    = document.getElementById('tax8').textContent;
-  const sum10   = document.getElementById('sum10').textContent;
-  const tax10   = document.getElementById('tax10').textContent;
-  const sumBag  = document.getElementById('sumBag').textContent;
-  const taxBag  = document.getElementById('taxBag').textContent;
-  const deliveryVal = parseInt(document.getElementById('deliveryFee').value) || 0;
+  const sum8       = document.getElementById('sum8').textContent;
+  const sum10      = document.getElementById('sum10').textContent;
+  const sumBag     = document.getElementById('sumBag').textContent;
+  const deliveryVal  = parseInt((document.getElementById('deliveryFee').value || '').replace(/,/g, '')) || 0;
   const deliveryDisp = deliveryVal > 0 ? fmt(deliveryVal) : '';
-  const taxDelivery = document.getElementById('taxDelivery').textContent;
-  const sumTotal = document.getElementById('sumTotal').textContent;
-  const taxTotal = document.getElementById('taxTotal').textContent;
-  const dateText = document.getElementById('dateDisplay').textContent;
+  const sumTotal   = document.getElementById('sumTotal').textContent;
   const remarkText = document.getElementById('remark').value || '';
-  const custName  = document.getElementById('customerName').value.trim();
-  const custZip   = document.getElementById('customerZip').value.trim();
-  const custAddr1 = document.getElementById('customerAddr1').value.trim();
-  const custAddr2 = document.getElementById('customerAddr2').value.trim();
-  const custAddr3 = document.getElementById('customerAddr3').value.trim();
-  const custTel   = document.getElementById('customerTel') ? document.getElementById('customerTel').value.trim() : '';
+  const custCardNo = document.getElementById('customerCardNo').value.trim();
+  const custName   = document.getElementById('customerName').value.trim();
+  const custZip    = document.getElementById('customerZip').value.trim();
+  const custAddr1  = document.getElementById('customerAddr1').value.trim();
+  const custTel    = document.getElementById('customerTel') ? document.getElementById('customerTel').value.trim() : '';
+  const dateUketsuke = formatDateJP(document.getElementById('dateUketsuke').value);
+  const dateShiyo    = formatDateJP(document.getElementById('dateShiyo').value);
+  const dateShukkin  = formatDateJP(document.getElementById('dateShukkin').value);
+
+  // 共通CSSスタイル（帳票内インライン用）
+  const cellBorder = 'border:none;';
+  const tblBorder  = 'border-collapse:collapse;width:100%;font-size:10.5pt;border:none;';
 
   const COPY_TITLES = ['注文書', '注文書（控）', '注文書（お客様控）'];
 
-  const buildCopy = (copyTitle) => chunks.map((rows, idx) => `
+  const buildCopy = (copyTitle, copyIndex) => chunks.map((rows, idx) => `
     <section class="print-page">
-      <div style="position:relative;margin-bottom:1mm;">
-        <div class="page-title" style="text-align:center;">${escapeHtml(copyTitle)}</div>
-        <div style="position:absolute;top:0;right:0;font-size:10pt;line-height:1.2;">
-          ${escapeHtml(dateText)}
-        </div>
+      <!-- タイトル -->
+      <div style="text-align:center;margin-bottom:5mm;">
+        <div class="page-title">${escapeHtml(copyTitle)}</div>
       </div>
-      <!-- 住所(左) + 店舗情報(右) -->
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2mm;">
-        <div style="font-size:12pt;line-height:2;">
-          ${custZip ? `<div><span style="font-size:10pt;color:#555;">〒</span> ${escapeHtml(custZip)}</div>` : ''}
-          ${(custAddr1 || custAddr2 || custAddr3) ? `<div>${[custAddr1, custAddr2, custAddr3].filter(Boolean).map(a => escapeHtml(a)).join('')}</div>` : ''}
-          ${custName ? `<div style="font-size:13pt;font-weight:700;margin-top:0.5mm;">${escapeHtml(custName)} <span style="font-size:11pt;font-weight:400;">様</span></div>` : ''}
-          ${custTel  ? `<div style="font-size:11pt;">TEL: ${escapeHtml(custTel)}</div>` : ''}
+      <!-- 左：日付＋中央：顧客情報（行揃え） ／ 右：店舗情報 -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2mm;gap:6mm;">
+
+        <!-- 左：日付 -->
+        <div style="font-size:10pt;background:#fff;">
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <span style="font-weight:700;white-space:nowrap;">承り日</span>
+            <span style="white-space:nowrap;">${escapeHtml(dateUketsuke)}</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <span style="font-weight:700;white-space:nowrap;">使用日</span>
+            <span style="white-space:nowrap;">${escapeHtml(dateShiyo)}</span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <span style="font-weight:700;white-space:nowrap;">集金日</span>
+            <span style="white-space:nowrap;">${escapeHtml(dateShukkin)}</span>
+          </div>
         </div>
-        <div class="shop-info" style="text-align:left;line-height:1.6;">
-          <span style="font-size:15pt;font-weight:700;display:block;">ハリカ八女店</span>
-          <span style="display:block;">〒834-0023</span>
-          <span style="display:block;">福岡県八女市馬場５４−４</span>
-          <span style="display:block;">TEL 0943-24-2355　FAX 0943-24-2364</span>
-          <span style="display:block;">営業時間：10:00〜18:00　店休日：日曜日</span>
+
+        <!-- 中央：顧客情報 -->
+        <div style="margin-left:3.5cm;font-size:10pt;background:#fff;line-height:1.9;">
+          <div>
+            <span style="font-weight:700;">カードNo.&nbsp;</span>${escapeHtml(custCardNo)}　<span style="font-size:12.5pt;font-weight:700;">${escapeHtml(custName)}</span>${custName ? '&nbsp;<span style="font-size:12.5pt;font-weight:400;">様</span>' : ''}
+          </div>
+          <div>
+            <span style="font-weight:700;">〒&nbsp;</span>${escapeHtml(custZip)}
+          </div>
+          <div>${escapeHtml(custAddr1)}</div>
+          <div>
+            <span style="font-weight:700;">TEL&nbsp;</span>${escapeHtml(custTel)}
+          </div>
         </div>
+
+        <!-- 右：店舗情報（3部目のみ表示） -->
+        <div style="min-width:155px;flex:0 0 auto;${copyIndex !== 2 ? 'visibility:hidden;' : ''}font-size:10pt;line-height:1.7;">
+          <div style="font-size:14pt;font-weight:700;">ハリカ八女店</div>
+          <div>〒834-0023</div>
+          <div>福岡県八女市馬場５４−４</div>
+          <div>TEL 0943-24-2355　FAX 0943-24-2364</div>
+          <div>営業時間：10:00〜18:00　店休日：日曜日</div>
+        </div>
+
       </div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th style="width:28px;background:#fff;color:#1a2535;">No.</th>
-              <th style="width:100px;background:#fff;color:#1a2535;">商品番号</th>
-              <th style="background:#fff;color:#1a2535;">商品名</th>
-              <th style="width:140px;background:#fff;color:#1a2535;">定価</th>
-              <th style="width:140px;background:#fff;color:#1a2535;">会員価格</th>
-              <th style="width:84px;background:#fff;color:#1a2535;">数量</th>
-              <th style="width:84px;background:#fff;color:#1a2535;">発送数</th>
-              <th style="width:64px;background:#fff;color:#1a2535;">単位</th>
-              <th style="width:144px;background:#fff;color:#1a2535;">金額</th>
-              <th style="width:72px;background:#fff;color:#1a2535;">税率</th>
+              <th style="width:28px;background:#dce8f5;color:#1a2535;">No.</th>
+              <th style="width:100px;background:#dce8f5;color:#1a2535;">商品番号</th>
+              <th style="background:#dce8f5;color:#1a2535;">商品名</th>
+              <th style="width:110px;background:#dce8f5;color:#1a2535;">定価</th>
+              <th style="width:110px;background:#dce8f5;color:#1a2535;">会員価格</th>
+              <th style="width:60px;background:#dce8f5;color:#1a2535;">数量</th>
+              <th style="width:70px;background:#dce8f5;color:#1a2535;">内発送数</th>
+              <th style="width:50px;background:#dce8f5;color:#1a2535;">単位</th>
+              <th style="width:110px;background:#dce8f5;color:#1a2535;">金額</th>
+              <th style="width:55px;background:#dce8f5;color:#1a2535;">税率</th>
             </tr>
           </thead>
           <tbody>
@@ -1484,39 +1595,42 @@ function buildPrintPages() {
           <div class="label">備考</div>
           <div class="remark-box">${remarkText ? escapeHtml(remarkText) : '　'}</div>
         </div>
-        <div class="print-summary-box">
-          <table class="summary-table">
+        <div class="print-summary-box" style="border:1px solid #999;border-radius:8px;overflow:hidden;padding:0;">
+          <table style="border-collapse:separate;border-spacing:0;width:100%;font-size:10pt;">
             <thead>
               <tr>
-                <th style="background:#fff;color:#1a2535;">項目</th>
-                <th style="background:#fff;color:#1a2535;">税込金額</th>
-                <th style="background:#fff;color:#1a2535;">内消費税</th>
+                <th style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:8px 8px;background:#dce8f5 !important;color:#1a2535;font-weight:700;text-align:center;">項目</th>
+                <th style="border-bottom:1px solid #aaa;padding:8px 8px;background:#dce8f5 !important;color:#1a2535;font-weight:700;text-align:center;">税込金額</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>8%合計</td><td class="amt">${escapeHtml(sum8)}</td><td class="tax">${escapeHtml(tax8)}</td></tr>
-              <tr><td>10%合計</td><td class="amt">${escapeHtml(sum10)}</td><td class="tax">${escapeHtml(tax10)}</td></tr>
-              <tr><td>袋代合計</td><td class="amt">${escapeHtml(sumBag)}</td><td class="tax">${escapeHtml(taxBag)}</td></tr>
-              <tr><td>配送料</td><td class="amt">${escapeHtml(deliveryDisp)}</td><td class="tax">${escapeHtml(taxDelivery)}</td></tr>
-              <tr class="total-row"><td>合計金額</td><td class="amt">${escapeHtml(sumTotal)}</td><td class="tax">${escapeHtml(taxTotal)}</td></tr>
+              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:8px 8px;color:#1a2535;">8%合計</td><td style="border-bottom:1px solid #aaa;padding:8px 8px;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(sum8)}</td></tr>
+              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:8px 8px;background:#f0f5fb !important;color:#1a2535;">10%合計</td><td style="border-bottom:1px solid #aaa;padding:8px 8px;background:#f0f5fb !important;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(sum10)}</td></tr>
+              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:8px 8px;color:#1a2535;">袋代合計</td><td style="border-bottom:1px solid #aaa;padding:8px 8px;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(sumBag)}</td></tr>
+              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:8px 8px;background:#f0f5fb !important;color:#1a2535;">配送料</td><td style="border-bottom:1px solid #aaa;padding:8px 8px;background:#f0f5fb !important;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(deliveryDisp)}</td></tr>
+              <tr><td style="border-top:1px solid #1a2535;border-right:1px solid #999;padding:8px 8px;font-size:10.5pt;font-weight:900;color:#1a2535;">合計金額</td><td style="border-top:1px solid #1a2535;padding:8px 8px;text-align:right;font-size:10.5pt;font-weight:900;color:#1a2535;">${escapeHtml(sumTotal)}</td></tr>
             </tbody>
           </table>
         </div>
       </div>
-      <div class="print-page-number">${idx + 1} / ${totalPages}</div>
     </section>`).join('');
 
-  printPages.innerHTML = COPY_TITLES.map(title => buildCopy(title)).join('');
+  printPages.innerHTML = COPY_TITLES.map((title, i) => buildCopy(title, i)).join('');
 }
 
 function handlePrint() {
   buildPrintPages();
-  // iOSで印刷時に正しいスケールになるようviewportを一時変更
   const vpMeta = document.querySelector('meta[name="viewport"]');
   const origContent = vpMeta ? vpMeta.getAttribute('content') : '';
   if (vpMeta) vpMeta.setAttribute('content', 'width=1060');
+  // ブラウザのヘッダー（タイトル・日時）・フッター（URL）を消すためtitleを空にする
+  const origTitle = document.title;
+  document.title = '';
   window.print();
-  if (vpMeta) setTimeout(() => vpMeta.setAttribute('content', origContent), 500);
+  setTimeout(() => {
+    document.title = origTitle;
+    if (vpMeta) vpMeta.setAttribute('content', origContent);
+  }, 500);
 }
 
 // =====================================================
