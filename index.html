@@ -96,7 +96,7 @@ body {
   border: 1px solid var(--border);
   overflow-x: auto;
   overflow-y: auto;
-  max-height: calc(100vh - 160px);
+  max-height: 310px;
   margin-bottom: 14px;
 }
 table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
@@ -124,6 +124,13 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 }
 .inp-code:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,120,212,0.12); }
 
+.inp-member {
+  width: 72px; padding: 6px;
+  border: 1.5px solid var(--border); border-radius: 5px;
+  font-family: 'Noto Sans JP', sans-serif; font-size: 0.87rem;
+  text-align: right; background: #fff; transition: border 0.15s;
+}
+.inp-member:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,120,212,0.12); }
 .inp-qty {
   width: 58px; padding: 6px;
   border: 1.5px solid var(--border); border-radius: 5px;
@@ -532,10 +539,11 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
     border-bottom: 1px solid #888;
     border-left: 2px solid #555;
     border-right: 0;
-    padding: 8px 5px;
+    padding: 0 5px;
     line-height: 1.3;
     vertical-align: middle;
     font-size: 11pt;
+    height: 46px;
   }
   .print-page tbody td:last-child {
     border-right: 2px solid #555;
@@ -584,7 +592,7 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
     min-width: 0;
     display: flex;
     flex-direction: column;
-    min-height: 136px;
+    min-height: 230px;
   }
   .print-page .print-remark-left .label {
     font-weight: 700;
@@ -597,7 +605,7 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
     border: 1.5px solid #888;
     border-radius: 4px;
     padding: 6px 10px;
-    font-size: 10pt;
+    font-size: 14pt;
     white-space: pre-wrap;
     word-break: break-word;
   }
@@ -683,9 +691,9 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 <input accept=".csv" id="csvFileInput" onchange="onFileSelect(event)" type="file"/>
 <div class="csv-format">
 <b>CSVフォーマット（1行目はヘッダー行）</b><br/>
-      品番,ﾒｰｶｰ商品№,商品名,定価,会員単価,税率,単位,商品区分<br/>
-      aa,M-001,商品名1,500,400,8,箱,1<br/>
-      bb,M-002,袋商品,100,80,10,枚,2
+      品番,ﾒｰｶｰ商品№,商品名,定価,会員単価,税率,商品区分<br/>
+      aa,M-001,商品名1,500,400,8,1<br/>
+      bb,M-002,袋商品,100,80,10,2
     </div>
 <div id="masterPreviewWrap" style="display:none">
 <div class="master-preview" id="masterPreview"></div>
@@ -738,14 +746,14 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
   <!-- 顧客情報 -->
   <div class="customer-field-row">
     <span class="customer-field-label">カードNo.</span>
-    <input class="inp-customer" id="customerCardNo" type="text" placeholder="カードNo." style="width:110px;flex:0 0 110px;">
+    <input class="inp-customer" id="customerCardNo" type="text" inputmode="numeric" placeholder="カードNo." oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="width:110px;flex:0 0 110px;">
     <span class="customer-field-label" style="margin-left:20px;">氏名</span>
     <input class="inp-customer" id="customerName" type="text" placeholder="氏名を入力" style="width:160px;flex:0 0 160px;">
     <span class="customer-field-label-after">様</span>
   </div>
   <div class="customer-field-row">
     <span class="customer-field-label">電話番号</span>
-    <input class="inp-customer" id="customerTel" type="tel" placeholder="000-0000-0000" style="width:150px;flex:0 0 150px;">
+    <input class="inp-customer" id="customerTel" type="tel" inputmode="tel" placeholder="000-0000-0000" oninput="this.value=this.value.replace(/[^0-9\-]/g,'')" style="width:150px;flex:0 0 150px;">
   </div>
   <div class="customer-field-row">
     <span class="customer-field-label">郵便番号</span>
@@ -760,13 +768,12 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 <thead>
 <tr>
 <th style="width:36px;">No.</th>
-<th style="width:140px;">品番</th>
+<th style="width:140px;">品番<br><span style="font-size:0.72em;font-weight:400;">メーカーNo.</span></th>
 <th style="width:220px;">商品名称</th>
 <th>定価</th>
 <th>会員価格</th>
 <th>数量</th>
 <th>内発送数</th>
-<th style="width:34px;">単位</th>
 <th>金額</th>
 <th>税率</th>
 </tr>
@@ -823,12 +830,12 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 //  商品マスタ（デフォルト）
 // =====================================================
 let PRODUCT_TABLE = {
-  'aa':{ name:'商品名1', makerNo:'M-001', unit:'箱', price:500,  member:400,  tax:8,  category:1 },
-  'bb':{ name:'商品名2', makerNo:'M-002', unit:'箱', price:1000, member:800,  tax:8,  category:1 },
-  'cc':{ name:'商品名3', makerNo:'M-003', unit:'箱', price:1500, member:1200, tax:10, category:1 },
-  'dd':{ name:'商品名4', makerNo:'M-004', unit:'箱', price:2000, member:1600, tax:10, category:1 },
-  'ee':{ name:'商品名5', makerNo:'M-005', unit:'箱', price:2500, member:2000, tax:8,  category:2 },
-  'ff':{ name:'商品名6', makerNo:'M-006', unit:'箱', price:3000, member:2400, tax:8,  category:2 },
+  'aa':{ name:'商品名1', makerNo:'M-001', price:500,  member:400,  tax:8,  category:1 },
+  'bb':{ name:'商品名2', makerNo:'M-002', price:1000, member:800,  tax:8,  category:1 },
+  'cc':{ name:'商品名3', makerNo:'M-003', price:1500, member:1200, tax:10, category:1 },
+  'dd':{ name:'商品名4', makerNo:'M-004', price:2000, member:1600, tax:10, category:1 },
+  'ee':{ name:'商品名5', makerNo:'M-005', price:2500, member:2000, tax:8,  category:2 },
+  'ff':{ name:'商品名6', makerNo:'M-006', price:3000, member:2400, tax:8,  category:2 },
 };
 // localStorage ラッパー（iPhone/ファイルアプリ等でブロックされる環境に対応）
 function lsGet(key) {
@@ -883,6 +890,30 @@ function formatZip(input) {
   } else {
     input.value = digits;
   }
+  // 7桁入力完了で住所検索
+  if (digits.length === 7) {
+    lookupZip(digits);
+  }
+}
+
+async function lookupZip(digits) {
+  try {
+    const res = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${digits}`);
+    const json = await res.json();
+    if (json.results && json.results.length > 0) {
+      const r = json.results[0];
+      const addr = (r.address1 || '') + (r.address2 || '') + (r.address3 || '');
+      const addrEl = document.getElementById('customerAddr1');
+      if (addrEl && !addrEl.value) {
+        addrEl.value = addr;
+      } else if (addrEl) {
+        // 既に入力がある場合は上書き確認なしで上書き
+        addrEl.value = addr;
+      }
+    }
+  } catch(e) {
+    // ネットワークエラー等は無視
+  }
 }
 
 // =====================================================
@@ -900,7 +931,9 @@ document.getElementById('dateUketsuke').value = getNow().isoDate;
 function formatDateJP(isoDate) {
   if (!isoDate) return '';
   const [y, m, d] = isoDate.split('-');
-  return `${y}年${m}月${d}日`;
+  const mDisp = parseInt(m);
+  const dDisp = parseInt(d);
+  return `${y}年<span style="display:inline-block;width:1.2em;text-align:right;">${mDisp}</span>月<span style="display:inline-block;width:1.2em;text-align:right;">${dDisp}</span>日`;
 }
 
 // =====================================================
@@ -917,23 +950,26 @@ function buildRows() {
       <td class="mono">${i+1}</td>
       <td>
         <div class="code-input-wrap">
-          <input class="inp-code" type="text" id="code${i}" placeholder="商品番号"
-            autocomplete="off" oninput="onCodeChange(${i})" onkeydown="onCodeKey(event,${i})">
+          <input class="inp-code" type="text" id="code${i}" placeholder="品番"
+            inputmode="url" autocomplete="off" oninput="onCodeChange(${i})" onkeydown="onCodeKey(event,${i})">
           <button type="button" class="code-search-btn" onclick="openSearchForRow(${i})" aria-label="商品検索">🔍</button>
         </div>
+        <div class="cell-makerno" id="makerno${i}"></div>
       </td>
-      <td class="left" id="name${i}"><span class="cell-name"></span><span class="cell-makerno"></span></td>
+      <td class="left" id="name${i}"></td>
       <td class="right mono" id="price${i}"></td>
-      <td class="right mono" id="member${i}"></td>
+      <td>
+        <input class="inp-member" type="text" inputmode="numeric" id="member${i}" placeholder="0"
+          oninput="onMemberInput(${i})" onkeydown="onMemberKey(event,${i})">
+      </td>
       <td>
         <input class="inp-qty" type="number" id="qty${i}" min="1" placeholder="0"
-          oninput="calc()" onkeydown="onQtyKey(event,${i})">
+          oninput="onQtyInput(${i})" onkeydown="onQtyKey(event,${i})">
       </td>
       <td>
         <input class="inp-qty" type="number" id="dispatch${i}" min="0" placeholder="0"
-          style="background:#fff;" onkeydown="onDispatchKey(event,${i})">
+          style="background:#fff;" oninput="onDispatchInput(${i})" onkeydown="onDispatchKey(event,${i})">
       </td>
-      <td id="unit${i}"></td>
       <td class="right mono" id="amt${i}"></td>
       <td id="taxrate${i}"></td>`;
     tbody.appendChild(tr);
@@ -945,15 +981,15 @@ buildRows();
 //  行クリア
 // =====================================================
 function clearRow(i) {
-  document.getElementById(`code${i}`).value = '';
-  document.getElementById(`qty${i}`).value  = '';
+  document.getElementById(`code${i}`).value   = '';
+  document.getElementById(`qty${i}`).value    = '';
+  document.getElementById(`member${i}`).value = '';
   document.getElementById(`dispatch${i}`).value = '';
-  ['price','member','unit','amt','taxrate'].forEach(f => {
+  ['price','amt','taxrate'].forEach(f => {
     document.getElementById(`${f}${i}`).innerHTML = '';
   });
-  const nc = document.getElementById(`name${i}`);
-  nc.querySelector('.cell-name').textContent = '';
-  nc.querySelector('.cell-makerno').textContent = '';
+  document.getElementById(`name${i}`).textContent = '';
+  document.getElementById(`makerno${i}`).textContent = '';
   calc();
 }
 
@@ -962,26 +998,29 @@ function clearRow(i) {
 // =====================================================
 function onCodeChange(i) {
   const el = document.getElementById(`code${i}`);
-  el.value = el.value.toUpperCase();
+  el.value = el.value.replace(/[^A-Za-z0-9\-]/g, '').toUpperCase();
   const code = el.value.trim().toLowerCase();
   const item = PRODUCT_TABLE[code];
   if (item) {
-    document.getElementById(`name${i}`).querySelector('.cell-name').textContent    = item.name;
-    document.getElementById(`name${i}`).querySelector('.cell-makerno').textContent = item.makerNo || '';
+    document.getElementById(`name${i}`).textContent   = item.name;
+    document.getElementById(`makerno${i}`).textContent = item.makerNo || '';
     document.getElementById(`price${i}`).textContent  = fmt(item.price);
-    document.getElementById(`member${i}`).textContent = fmt(item.member);
-    document.getElementById(`unit${i}`).textContent   = item.unit || '';
+    document.getElementById(`member${i}`).value = item.member ? Number(item.member).toLocaleString('ja-JP') : '';
     document.getElementById(`taxrate${i}`).innerHTML  =
       `<span class="tax-badge tax-${item.tax}">${item.tax}%</span>`;
   } else {
     const mark = code ? '<span style="color:#e53935;font-size:0.78rem">?</span>' : '';
-    ['price','member','unit','taxrate'].forEach(f => {
+    ['price','taxrate'].forEach(f => {
       document.getElementById(`${f}${i}`).innerHTML = mark;
     });
-    const nameCell = document.getElementById(`name${i}`);
-    nameCell.querySelector('.cell-name').innerHTML = mark;
-    nameCell.querySelector('.cell-makerno').textContent = '';
+    document.getElementById(`name${i}`).innerHTML = mark;
+    document.getElementById(`makerno${i}`).textContent = '';
+    document.getElementById(`member${i}`).value = '';
     document.getElementById(`amt${i}`).innerHTML = '';
+    // 品番が空なら数量・会員価格もクリア
+    if (!code) {
+      document.getElementById(`qty${i}`).value = '';
+    }
   }
   calc();
 }
@@ -993,11 +1032,59 @@ function onCodeKey(e, i) {
     q.focus(); q.select();
   }
 }
+function onQtyInput(i) {
+  const qty      = parseInt(document.getElementById(`qty${i}`).value) || 0;
+  const dispEl   = document.getElementById(`dispatch${i}`);
+  const dispatch = parseInt(dispEl.value) || 0;
+  if (dispatch > qty) {
+    dispEl.value = qty > 0 ? qty : '';
+  }
+  calc();
+}
 function onQtyKey(e, i) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const m = document.getElementById(`member${i}`);
+    m.focus(); m.select();
+  }
+}
+function onMemberInput(i) {
+  const el = document.getElementById(`member${i}`);
+  const raw = el.value.replace(/,/g, '').replace(/[^0-9]/g, '');
+  const num = parseInt(raw);
+  if (!isNaN(num) && raw !== '') {
+    el.value = num.toLocaleString('ja-JP');
+    // 定価＜会員価格チェック
+    const priceEl = document.getElementById(`price${i}`);
+    const priceText = priceEl ? priceEl.textContent.replace(/[^0-9]/g, '') : '';
+    const price = parseInt(priceText) || 0;
+    if (price > 0 && num > price) {
+      el.value = num.toLocaleString('ja-JP');
+      alert('会員価格に定価を超える入力はできません。');
+      el.value = '';
+    }
+  } else if (raw === '') {
+    el.value = '';
+  }
+  calc();
+}
+function getMemberValue(i) {
+  const val = document.getElementById(`member${i}`).value.replace(/,/g, '');
+  return parseInt(val) || 0;
+}
+function onMemberKey(e, i) {
   if (e.key === 'Enter') {
     e.preventDefault();
     const d = document.getElementById(`dispatch${i}`);
     d.focus(); d.select();
+  }
+}
+function onDispatchInput(i) {
+  const qty      = parseInt(document.getElementById(`qty${i}`).value) || 0;
+  const dispatch = parseInt(document.getElementById(`dispatch${i}`).value) || 0;
+  if (qty > 0 && dispatch > qty) {
+    document.getElementById(`dispatch${i}`).value = qty;
+    alert('内発送数に数量を超える入力はできません。');
   }
 }
 function onDispatchKey(e, i) {
@@ -1020,9 +1107,10 @@ function calc() {
   for (let i = 0; i < ROWS; i++) {
     const code = document.getElementById(`code${i}`).value.trim().toLowerCase();
     const item = PRODUCT_TABLE[code];
-    const qty  = parseInt(document.getElementById(`qty${i}`).value) || 0;
+    const qty    = parseInt(document.getElementById(`qty${i}`).value) || 0;
+    const member = getMemberValue(i);
     if (item && qty > 0) {
-      const amt = item.member * qty;
+      const amt = member * qty;
       document.getElementById(`amt${i}`).textContent = fmt(amt);
       const cat = parseInt(item.category) || 1;
       const tax = parseInt(item.tax) || 8;
@@ -1090,7 +1178,7 @@ function persistProductTable() {
 
 function buildProductTableCSV() {
   const lines = [];
-  lines.push('品番,ﾒｰｶｰ商品№,商品名,定価,会員単価,税率,単位,商品区分');
+  lines.push('品番,ﾒｰｶｰ商品№,商品名,定価,会員単価,税率,商品区分');
   Object.entries(PRODUCT_TABLE)
     .sort((a,b) => a[0].localeCompare(b[0], 'ja'))
     .forEach(([code, item]) => {
@@ -1101,7 +1189,6 @@ function buildProductTableCSV() {
         csvEscape(item.price ?? 0),
         csvEscape(item.member ?? 0),
         csvEscape(item.tax ?? ''),
-        csvEscape(item.unit || ''),
         csvEscape(item.category ?? 1),
       ];
       lines.push(row.join(','));
@@ -1254,7 +1341,7 @@ function renderSearchResults() {
   }
 
   let html = '<table><thead><tr>'
-    + '<th>選択</th><th style="width:100px;">品番</th><th style="width:120px;">ﾒｰｶｰ商品№</th><th style="width:200px;">商品名称</th><th>定価</th><th>会員単価</th><th>税率</th><th style="width:60px;">単位</th>'
+    + '<th>選択</th><th style="width:100px;">品番</th><th style="width:120px;">ﾒｰｶｰ商品№</th><th style="width:200px;">商品名称</th><th>定価</th><th>会員単価</th><th>税率</th>'
     + '</tr></thead><tbody>';
 
   rows.forEach(([code, item]) => {
@@ -1268,7 +1355,6 @@ function renderSearchResults() {
       <td style="text-align:right;">${item.price !== '' && item.price !== null && item.price !== undefined ? fmt(item.price) : ''}</td>
       <td style="text-align:right;">${item.member !== '' && item.member !== null && item.member !== undefined ? fmt(item.member) : ''}</td>
       <td>${item.tax ? `${item.tax}%` : ''}</td>
-      <td>${escapeHtml(item.unit || '')}</td>
     </tr>`;
   });
 
@@ -1352,7 +1438,7 @@ function parseCSV(text) {
 
   // ヘッダー行でフォーマット判定
   const headerCols = parseCSVLine(lines[0]).map(c => c.trim());
-  // 新フォーマット: 品番,ﾒｰｶｰ商品№,商品名,定価,会員単価,税率,単位,商品区分
+  // 新フォーマット: 品番,ﾒｰｶｰ商品№,商品名,定価,会員単価,税率,商品区分
   // 旧フォーマット: 商品番号,商品名,規格,単位,税率,定価,会員価格,商品区分
   const isNewFormat = headerCols[3] === '定価' || headerCols[3] === '定価';
   // 旧フォーマット判定: 4列目(index=3)が'単位'なら旧
@@ -1373,29 +1459,27 @@ function parseCSV(text) {
       duplicateCode = code;
       return;
     }
-    let makerNo, name, unit, taxStr, priceStr, memberStr, categoryStr;
+    let makerNo, name, taxStr, priceStr, memberStr, categoryStr;
     if (isOldFormat) {
       // 旧フォーマット: 商品番号,商品名,規格,単位,税率,定価,会員価格[,商品区分]
       if (trimmed.length >= 8) {
-        [, name, makerNo, unit, taxStr, priceStr, memberStr, categoryStr] = trimmed;
+        [, name, makerNo,, taxStr, priceStr, memberStr, categoryStr] = trimmed;
       } else if (trimmed.length >= 7) {
-        [, name, makerNo, unit, taxStr, priceStr, memberStr] = trimmed;
+        [, name, makerNo,, taxStr, priceStr, memberStr] = trimmed;
         categoryStr = '1';
       } else {
         [, name, makerNo, taxStr, priceStr, memberStr] = trimmed;
-        unit = '';
         categoryStr = '1';
       }
     } else {
-      // 新フォーマット: 品番,ﾒｰｶｰ商品№,商品名,定価,会員単価,税率,単位[,商品区分]
-      if (trimmed.length >= 8) {
-        [, makerNo, name, priceStr, memberStr, taxStr, unit, categoryStr] = trimmed;
-      } else if (trimmed.length >= 7) {
-        [, makerNo, name, priceStr, memberStr, taxStr, unit] = trimmed;
+      // 新フォーマット: 品番,ﾒｰｶｰ商品№,商品名,定価,会員単価,税率[,商品区分]
+      if (trimmed.length >= 7) {
+        [, makerNo, name, priceStr, memberStr, taxStr, categoryStr] = trimmed;
+      } else if (trimmed.length >= 6) {
+        [, makerNo, name, priceStr, memberStr, taxStr] = trimmed;
         categoryStr = '1';
       } else {
         [, makerNo, name, priceStr, memberStr, taxStr] = trimmed;
-        unit = '';
         categoryStr = '1';
       }
     }
@@ -1403,8 +1487,8 @@ function parseCSV(text) {
     const price    = parseInt(priceStr)    || 0;
     const member   = parseInt(memberStr)   || 0;
     const category = parseInt(categoryStr) || 1;
-    newMaster[code.toLowerCase()] = { name, makerNo, unit, price, member, tax, category };
-    previewRows.push({ code: code.toUpperCase(), makerNo, name, unit, tax, price, member, category });
+    newMaster[code.toLowerCase()] = { name, makerNo, price, member, tax, category };
+    previewRows.push({ code: code.toUpperCase(), makerNo, name, tax, price, member, category });
   });
   if (duplicateCode) {
     alert('同じ商品コードがあります。取込ファイルを修正してください。商品番号=' + duplicateCode);
@@ -1424,11 +1508,11 @@ function showMasterPreview(rows) {
   const prev = document.getElementById('masterPreview');
   wrap.style.display = 'block';
   let html = '<table><thead><tr>'
-    + '<th style="width:100px;">品番</th><th style="width:120px;">ﾒｰｶｰ商品№</th><th style="width:180px;">商品名称</th><th>定価</th><th>会員単価</th><th>税率</th><th style="width:60px;">単位</th><th>商品区分</th>'
+    + '<th style="width:100px;">品番</th><th style="width:120px;">ﾒｰｶｰ商品№</th><th style="width:180px;">商品名称</th><th>定価</th><th>会員単価</th><th>税率</th><th>商品区分</th>'
     + '</tr></thead><tbody>';
   rows.forEach(r => {
     html += `<tr><td>${r.code}</td><td>${r.makerNo||''}</td><td>${r.name}</td><td>${fmt(r.price)}</td><td>${fmt(r.member)}</td>`
-          + `<td>${r.tax ? `${r.tax}%` : ''}</td><td>${r.unit||''}</td><td>${r.category||1}</td></tr>`;
+          + `<td>${r.tax ? `${r.tax}%` : ''}</td><td>${r.category||1}</td></tr>`;
   });
   html += '</tbody></table>';
   prev.innerHTML = html;
@@ -1465,18 +1549,18 @@ function getCurrentRowsForPrint() {
     // 印刷対象は、商品番号または数量が入っている行のみ
     if (!code && !qty) continue;
 
-    const amt = item && qtyNum > 0 ? item.member * qtyNum : 0;
+    const amt = item && qtyNum > 0 ? getMemberValue(i) * qtyNum : 0;
     rows.push({
       no: i + 1,
       code,
       name: item ? item.name : '',
       makerNo: item ? item.makerNo : '',
       price: item ? item.price : '',
-      member: item ? item.member : '',
+      member: getMemberValue(i) || '',
       qty,
       dispatch,
       amt,
-      unit: item ? (item.unit || '') : '',
+
       tax: item ? item.tax : '',
       category: item ? (item.category || 1) : 1
     });
@@ -1495,27 +1579,26 @@ function buildPrintPageRows(rows) {
   const out = [];
   for (let idx = 0; idx < rows.length; idx++) {
     const r = rows[idx];
+    const priceStr = r.price !== '' && r.price !== null && r.price !== undefined ? `(${fmt(r.price)})` : '';
     out.push(`
     <tr>
       <td class="mono">${idx + 1}</td>
-      <td class="mono">${escapeHtml(r.code || '')}</td>
-      <td class="left">${escapeHtml(r.name || '')}</td>
-      <td class="right mono">${r.price !== '' ? fmt(r.price) : ''}</td>
+      <td class="mono" style="line-height:1.6;">${escapeHtml(r.code || '')}<br><span style="color:#5a6a7e;">${escapeHtml(r.makerNo || '')}</span></td>
+      <td class="left">${escapeHtml(r.name || '')}${priceStr ? '（' + priceStr.replace(/^\((.+)\)$/, '$1') + '）' : ''}</td>
       <td class="right mono">${r.member !== '' ? fmt(r.member) : ''}</td>
       <td class="mono">${escapeHtml(r.qty || '')}</td>
       <td class="mono">${escapeHtml(r.dispatch || '')}</td>
-      <td>${escapeHtml(r.unit || '')}</td>
+      <td></td>
       <td class="right mono">${r.amt ? fmt(r.amt) : ''}</td>
       <td>${r.tax ? `<span class="tax-badge tax-${r.tax}">${r.tax}%</span>` : ''}</td>
     </tr>`);
   }
-  while (out.length < 6) {
+  while (out.length < 5) {
     out.push(`
     <tr>
       <td class="mono">${out.length + 1}</td>
-      <td class="mono"></td>
+      <td class="mono" style="line-height:1.6;"></td>
       <td class="left"></td>
-      <td class="right mono"></td>
       <td class="right mono"></td>
       <td class="mono"></td>
       <td class="mono"></td>
@@ -1530,7 +1613,7 @@ function buildPrintPageRows(rows) {
 function buildPrintPages() {
   const printPages = document.getElementById('printPages');
   const allRows = getCurrentRowsForPrint();
-  const chunkSize = 6;
+  const chunkSize = 5;
   const chunks = [];
   for (let i = 0; i < allRows.length; i += chunkSize) chunks.push(allRows.slice(i, i + chunkSize));
   const totalPages = chunks.length;
@@ -1567,25 +1650,25 @@ function buildPrintPages() {
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2mm;gap:6mm;">
 
         <!-- 左：日付 -->
-        <div style="font-size:10pt;background:#fff;">
+        <div style="font-size:14pt;background:#fff;align-self:center;margin-top:-2mm;">
           <div style="display:flex;gap:8px;margin-bottom:8px;">
             <span style="font-weight:700;white-space:nowrap;">承り日</span>
-            <span style="white-space:nowrap;">${escapeHtml(dateUketsuke)}</span>
+            <span style="white-space:nowrap;">${dateUketsuke}</span>
           </div>
           <div style="display:flex;gap:8px;margin-bottom:8px;">
             <span style="font-weight:700;white-space:nowrap;">使用日</span>
-            <span style="white-space:nowrap;">${escapeHtml(dateShiyo)}</span>
+            <span style="white-space:nowrap;">${dateShiyo}</span>
           </div>
           <div style="display:flex;gap:8px;">
             <span style="font-weight:700;white-space:nowrap;">集金日</span>
-            <span style="white-space:nowrap;">${escapeHtml(dateShukkin)}</span>
+            <span style="white-space:nowrap;">${dateShukkin}</span>
           </div>
         </div>
 
         <!-- 中央：顧客情報 -->
-        <div style="margin-left:3.5cm;font-size:10pt;background:#fff;line-height:1.9;">
+        <div style="margin-left:2.5cm;font-size:14pt;background:#fff;line-height:1.4;">
           <div>
-            <span style="font-weight:700;">カードNo.&nbsp;</span>${escapeHtml(custCardNo)}　<span style="font-size:12.5pt;font-weight:700;">${escapeHtml(custName)}</span>${custName ? '&nbsp;<span style="font-size:12.5pt;font-weight:400;">様</span>' : ''}
+            <span style="font-weight:700;">カードNo.&nbsp;</span>${escapeHtml(custCardNo)}　<span style="font-size:16.5pt;font-weight:700;">${escapeHtml(custName)}</span>${custName ? '　<span style="font-size:16.5pt;font-weight:400;">様</span>' : ''}
           </div>
           <div>
             <span style="font-weight:700;">〒&nbsp;</span>${escapeHtml(custZip)}
@@ -1611,15 +1694,14 @@ function buildPrintPages() {
           <thead>
             <tr>
               <th style="width:28px;background:#dce8f5;color:#1a2535;">No.</th>
-              <th style="width:100px;background:#dce8f5;color:#1a2535;">品番</th>
-              <th style="background:#dce8f5;color:#1a2535;">商品名称</th>
-              <th style="width:110px;background:#dce8f5;color:#1a2535;">定価</th>
-              <th style="width:110px;background:#dce8f5;color:#1a2535;">会員価格</th>
-              <th style="width:60px;background:#dce8f5;color:#1a2535;">数量</th>
-              <th style="width:70px;background:#dce8f5;color:#1a2535;">内発送数</th>
-              <th style="width:50px;background:#dce8f5;color:#1a2535;">単位</th>
-              <th style="width:110px;background:#dce8f5;color:#1a2535;">金額</th>
-              <th style="width:55px;background:#dce8f5;color:#1a2535;">税率</th>
+              <th style="width:100px;background:#dce8f5;color:#1a2535;">品番<br><span style="font-size:0.8em;font-weight:400;">メーカーNo.</span></th>
+              <th style="width:282px;background:#dce8f5;color:#1a2535;">商品名称</th>
+              <th style="width:60px;background:#dce8f5;color:#1a2535;">会員価格</th>
+              <th style="width:45px;background:#dce8f5;color:#1a2535;">数量</th>
+              <th style="width:45px;background:#dce8f5;color:#1a2535;">内発送数</th>
+              <th style="width:45px;background:#dce8f5;color:#1a2535;">済印</th>
+              <th style="width:60px;background:#dce8f5;color:#1a2535;">金額</th>
+              <th style="width:28px;background:#dce8f5;color:#1a2535;">税率</th>
             </tr>
           </thead>
           <tbody>
@@ -1627,7 +1709,7 @@ function buildPrintPages() {
           </tbody>
         </table>
       </div>
-      <div class="print-summary-block">
+      <div class="print-summary-block" style="margin-top:0mm;">
         <div class="print-remark-left">
           <div class="label">備考</div>
           <div class="remark-box">${remarkText ? escapeHtml(remarkText) : '　'}</div>
@@ -1641,11 +1723,11 @@ function buildPrintPages() {
               </tr>
             </thead>
             <tbody>
-              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:8px 8px;color:#1a2535;">8%合計</td><td style="border-bottom:1px solid #aaa;padding:8px 8px;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(sum8)}</td></tr>
-              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:8px 8px;background:#f0f5fb !important;color:#1a2535;">10%合計</td><td style="border-bottom:1px solid #aaa;padding:8px 8px;background:#f0f5fb !important;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(sum10)}</td></tr>
-              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:8px 8px;color:#1a2535;">袋代合計</td><td style="border-bottom:1px solid #aaa;padding:8px 8px;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(sumBag)}</td></tr>
-              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:8px 8px;background:#f0f5fb !important;color:#1a2535;">配送料</td><td style="border-bottom:1px solid #aaa;padding:8px 8px;background:#f0f5fb !important;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(deliveryDisp)}</td></tr>
-              <tr><td style="border-top:1px solid #1a2535;border-right:1px solid #999;padding:8px 8px;font-size:10.5pt;font-weight:900;color:#1a2535;">合計金額</td><td style="border-top:1px solid #1a2535;padding:8px 8px;text-align:right;font-size:10.5pt;font-weight:900;color:#1a2535;">${escapeHtml(sumTotal)}</td></tr>
+              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:0 6px;height:34px;color:#1a2535;">8%合計</td><td style="border-bottom:1px solid #aaa;padding:0 6px;height:34px;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(sum8)}</td></tr>
+              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:0 6px;height:34px;background:#f0f5fb !important;color:#1a2535;">10%合計</td><td style="border-bottom:1px solid #aaa;padding:0 6px;height:34px;background:#f0f5fb !important;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(sum10)}</td></tr>
+              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:0 6px;height:34px;color:#1a2535;">袋代合計</td><td style="border-bottom:1px solid #aaa;padding:0 6px;height:34px;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(sumBag)}</td></tr>
+              <tr><td style="border-bottom:1px solid #aaa;border-right:1px solid #999;padding:0 6px;height:34px;background:#f0f5fb !important;color:#1a2535;">配送料</td><td style="border-bottom:1px solid #aaa;padding:0 6px;height:34px;background:#f0f5fb !important;text-align:right;font-weight:700;color:#1a2535;">${escapeHtml(deliveryDisp)}</td></tr>
+              <tr><td style="border-top:1px solid #1a2535;border-right:1px solid #999;padding:0 6px;height:34px;font-size:10.5pt;font-weight:900;color:#1a2535;">合計金額</td><td style="border-top:1px solid #1a2535;padding:0 6px;height:34px;text-align:right;font-size:10.5pt;font-weight:900;color:#1a2535;">${escapeHtml(sumTotal)}</td></tr>
             </tbody>
           </table>
         </div>
@@ -1656,6 +1738,26 @@ function buildPrintPages() {
 }
 
 function handlePrint() {
+  // 品番が入力されていて数量が0の行チェック
+  for (let i = 0; i < ROWS; i++) {
+    const code = document.getElementById(`code${i}`).value.trim();
+    const qty  = parseInt(document.getElementById(`qty${i}`).value) || 0;
+    if (code && qty === 0) {
+      alert('数量が未入力の行があります。');
+      document.getElementById(`qty${i}`).focus();
+      return;
+    }
+  }
+  // 品番が入力されていて会員価格が0の行チェック
+  for (let i = 0; i < ROWS; i++) {
+    const code   = document.getElementById(`code${i}`).value.trim();
+    const member = getMemberValue(i);
+    if (code && member === 0) {
+      alert('会員価格が未入力の行があります。');
+      document.getElementById(`member${i}`).focus();
+      return;
+    }
+  }
   buildPrintPages();
   const vpMeta = document.querySelector('meta[name="viewport"]');
   const origContent = vpMeta ? vpMeta.getAttribute('content') : '';
