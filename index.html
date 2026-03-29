@@ -729,7 +729,7 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
 <div class="btn-group">
 <button class="btn btn-print" onclick="handlePrint()">🖨️ 印刷</button>
 <button class="btn btn-clear" onclick="clearAll()">🗑️ クリア</button>
-<button class="btn btn-master" onclick="openModal()">⬆️ 商品マスタ</button><button class="btn btn-save" onclick="downloadProductTable()">⬇️ 商品マスタ</button>
+<button class="btn btn-master" onclick="openModal()" style="display:none;">⬆️ 商品マスタ</button><button class="btn btn-save" onclick="downloadProductTable()" style="display:none;">⬇️ 商品マスタ</button>
 </div>
 </div>
 <!-- 日付グループ＋顧客情報（統合ブロック） -->
@@ -1773,9 +1773,36 @@ function handlePrint() {
 }
 
 // =====================================================
+//  スプレッドシートから商品マスタを読み込む
+// =====================================================
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQqAGzvHmIvE5CxJO6MtC7KCnAFWE4n7wjFghy_8f0dY-zvM1DYImrsIANkOyuZcuC2_f8rygfGh9IY/pub?gid=833365817&single=true&output=csv';
+
+async function loadMasterFromSheet() {
+  try {
+    const res = await fetch(SHEET_CSV_URL);
+    if (!res.ok) throw new Error('fetch failed');
+    const text = await res.text();
+    parseCSV(text);
+    // parseCSVはpendingMasterにセットするだけなので、そのまま反映
+    if (pendingMaster && Object.keys(pendingMaster).length > 0) {
+      PRODUCT_TABLE = pendingMaster;
+      pendingMaster = null;
+      persistProductTable();
+      for (let i = 0; i < ROWS; i++) onCodeChange(i);
+      calc();
+      showToast(`✅ 商品マスタを読み込みました（${Object.keys(PRODUCT_TABLE).length}件）`);
+    }
+  } catch(e) {
+    // オフライン時などはlocalStorageのデータをそのまま使用
+    showToast('⚠️ 商品マスタの読み込みに失敗しました。保存済みデータを使用します。', '#b71c1c');
+  }
+}
+
+// =====================================================
 //  起動
 // =====================================================
 calc();
+loadMasterFromSheet();
 </script>
 </body>
 </html>
