@@ -1124,29 +1124,20 @@ function calc() {
       document.getElementById(`amt${i}`).innerHTML = '';
     }
   }
-  const taxAmt8   = Math.round(base8   * 8 / 108);
-  const taxAmt10  = Math.round(base10  * 10 / 110);
-  const total8    = base8  + Math.round(base8  * 0.08);
-  const total10   = base10 + Math.round(base10 * 0.10);
-
-  // bag (category=2): 商品区分=2の単価×数量の合計（税率によらず合算）
-
-  // delivery fee (手入力) — treat as 10% taxed
+  // 会員価格は税込なのでそのまま合計
+  // delivery fee (手入力)
   const deliveryRaw = parseInt((document.getElementById('deliveryFee').value || '').replace(/,/g, '')) || 0;
-  const deliveryTax = Math.round(deliveryRaw * 10 / 110);
 
-  const grand    = (base8 + Math.round(base8*0.08)) + (base10 + Math.round(base10*0.10)) + bagTotal + deliveryRaw;
-  const grandTax = taxAmt8 + taxAmt10 + deliveryTax;
+  const grand = base8 + base10 + bagTotal + deliveryRaw;
 
   const setCell = (id, v) => {
     const el = document.getElementById(id);
     if (el) el.textContent = v > 0 ? fmt(v) : '';
   };
-  setCell('sum8',     base8  + Math.round(base8  * 0.08)); setCell('tax8',     taxAmt8);
-  setCell('sum10',    base10 + Math.round(base10 * 0.10)); setCell('tax10',    taxAmt10);
+  setCell('sum8',     base8);
+  setCell('sum10',    base10);
   setCell('sumBag',   bagTotal);
-  setCell('taxDelivery', deliveryTax);
-  setCell('sumTotal', grand);                              setCell('taxTotal', grandTax);
+  setCell('sumTotal', grand);
 }
 
 // =====================================================
