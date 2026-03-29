@@ -1760,51 +1760,16 @@ function handlePrint() {
     }
   }
   buildPrintPages();
-  const printContent = document.getElementById('printPages').innerHTML;
-  const printStyles = Array.from(document.styleSheets)
-    .map(ss => {
-      try {
-        return Array.from(ss.cssRules).map(r => r.cssText).join('\n');
-      } catch(e) { return ''; }
-    }).join('\n');
-
-  const printWin = window.open('', '_blank', 'width=1200,height=900');
-  printWin.document.write(`<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=1060">
-<title></title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
-<style>
-${printStyles}
-@page {
-  size: A4 landscape;
-  margin: 8mm;
-  margin-header: 0;
-  margin-footer: 0;
-}
-html, body {
-  margin: 0;
-  padding: 0;
-  background: #fff;
-}
-.print-pages { display: block !important; }
-</style>
-</head>
-<body>
-<div class="print-pages">${printContent}</div>
-<script>
-window.onload = function() {
-  setTimeout(function() {
-    window.print();
-    setTimeout(function() { window.close(); }, 1000);
+  const vpMeta = document.querySelector('meta[name="viewport"]');
+  const origContent = vpMeta ? vpMeta.getAttribute('content') : '';
+  if (vpMeta) vpMeta.setAttribute('content', 'width=1060');
+  const origTitle = document.title;
+  document.title = '';
+  window.print();
+  setTimeout(() => {
+    document.title = origTitle;
+    if (vpMeta) vpMeta.setAttribute('content', origContent);
   }, 500);
-};
-<\/script>
-</body>
-</html>`);
-  printWin.document.close();
 }
 
 // =====================================================
