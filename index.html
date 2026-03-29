@@ -416,7 +416,12 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
   display: flex;
   flex-direction: column;
 }
-.print-page + .print-page { page-break-after: always; page-break-before: always; break-before: page; }
+.print-page + .print-page {
+  page-break-after: always; page-break-before: always; break-before: page;
+  margin-top: 12mm;
+  border-top: 3px dashed #aaa;
+  padding-top: 8mm;
+}
 .print-page-number {
   text-align: center;
   margin-top: 2mm;
@@ -479,6 +484,11 @@ td.mono  { font-family: 'Noto Sans JP', sans-serif; }
   .print-page:last-child {
     page-break-after: avoid;
     break-after: avoid;
+  }
+  .print-page + .print-page {
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
   }
 
   /* Title */
