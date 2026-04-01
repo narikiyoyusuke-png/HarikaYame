@@ -1008,7 +1008,7 @@ function clearRow(i) {
 // =====================================================
 function onCodeChange(i) {
   const el = document.getElementById(`code${i}`);
-  el.value = el.value.replace(/[^A-Za-z0-9\-]/g, '').toUpperCase();
+
   const code = el.value.trim().toLowerCase();
   const item = PRODUCT_TABLE[code];
   if (item) {
